@@ -1,0 +1,9 @@
+{
+  "name": "namumemo",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {},
+  "dependencies": {
+    "mongodb": "^6.5.0"
+  }
+}

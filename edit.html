@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>나무메모 - 내 메모 다듬기</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Pretendard 폰트 -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <style>
+    body {
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+    .wood-board {
+      background: radial-gradient(circle at 50% 30%, #a27b5c 0%, #7d5a3c 60%, #563d27 100%);
+      box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-[#F8F9FA] text-[#2D3436] min-h-screen flex flex-col relative">
+
+  <!-- 1. 최상단 네비게이션 헤더 -->
+  <header class="bg-white border-b border-[#E9ECEF] sticky top-0 z-40 px-6 py-3 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-8">
+      <a href="index.html" class="flex items-center gap-2 text-xl font-bold text-[#2D3436]">
+        <span class="w-7 h-7 rounded-full bg-[#82C91E]/20 text-[#5C940D] flex items-center justify-center text-sm font-black">▲</span>
+        나무메모
+      </a>
+      <nav class="flex gap-6 text-sm font-medium">
+        <a href="index.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">게시판</a>
+        <a href="edit.html" class="text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1">새 메모</a>
+        <a href="admin.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">관리</a>
+      </nav>
+    </div>
+
+    <!-- 유저 프로필 -->
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-[#E3FAFC] text-[#15AABF] flex items-center justify-center font-bold text-xs">
+        김
+      </div>
+      <div class="text-xs text-right leading-tight">
+        <p class="font-semibold text-gray-800">김소연</p>
+        <p class="text-gray-400 text-[10px]">일반 회원</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. 메인 컨텐츠 영역 -->
+  <main class="wood-board flex-1 p-4 md:p-8 flex flex-col items-center">
+    <div class="max-w-6xl w-full">
+
+      <!-- 타이틀 & 자동저장 상태 -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-2 mb-6 px-1">
+        <div>
+          <span class="text-xs text-white/80 font-medium tracking-wide">MY MEMO · 작성자만 수정할 수 있어요</span>
+          <h1 id="pageTitle" class="text-3xl font-extrabold text-white mt-1 drop-shadow-sm">내 메모 다듬기</h1>
+        </div>
+        <div class="text-xs text-white/75 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span id="autoSaveText">자동 저장 준비됨</span>
+        </div>
+      </div>
+
+      <!-- 2단 폼 & 미리보기 그리드 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- [좌측] 메모 작성/수정 폼 (7컬럼) -->
+        <section class="lg:col-span-7 bg-[#FAF9F5] rounded-xl shadow-xl p-6 md:p-8 border border-[#E8E5DC]">
+          <!-- 탭 메뉴 -->
+          <div class="flex gap-6 border-b border-gray-200 pb-3 mb-6 text-sm font-semibold">
+            <button id="tabNew" type="button" class="text-gray-400 hover:text-gray-600 transition pb-3 -mb-3">새 글 작성</button>
+            <button id="tabEdit" type="button" class="text-[#B04A36] border-b-2 border-[#B04A36] pb-3 -mb-3">내 글 편집</button>
+          </div>
+
+          <form id="memoForm" class="space-y-5">
+            <!-- 제목 -->
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="block text-xs font-bold text-gray-700">제목 *</label>
+                <span id="titleCounter" class="text-[11px] text-gray-400">0 / 40</span>
+              </div>
+              <input 
+                id="titleInput"
+                type="text" 
+                maxlength="40"
+                placeholder="한눈에 알아보기 쉬운 제목을 적어 주세요."
+                class="w-full bg-[#F1EFEA] border border-transparent focus:border-[#B04A36] focus:bg-white rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none transition"
+              />
+            </div>
+
+            <!-- 분류 -->
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1.5">분류 *</label>
+              <div class="relative">
+                <select id="categorySelect" class="w-full bg-[#F1EFEA] border border-transparent focus:border-[#B04A36] focus:bg-white rounded-lg px-3.5 py-2.5 text-sm text-gray-800 focus:outline-none appearance-none transition cursor-pointer">
+                  <option value="동네 이야기" selected>동네 이야기</option>
+                  <option value="생활 정보">생활 정보</option>
+                  <option value="나눔/거래">나눔/거래</option>
+                  <option value="질문/고민">질문/고민</option>
+                </select>
+                <span class="absolute inset-y-0 right-3.5 flex items-center pointer-events-none text-xs text-gray-400">▾</span>
+              </div>
+            </div>
+
+            <!-- 내용 -->
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="block text-xs font-bold text-gray-700">내용 *</label>
+                <span id="contentCounter" class="text-[11px] text-gray-400">0 / 2,000</span>
+              </div>
+              <textarea 
+                id="contentInput"
+                rows="7" 
+                maxlength="2000"
+                placeholder="이웃들과 나누고 싶은 이야기를 적어 보세요."
+                class="w-full bg-[#F1EFEA] border border-transparent focus:border-[#B04A36] focus:bg-white rounded-lg p-3.5 text-sm text-gray-800 leading-relaxed focus:outline-none resize-none transition"
+              ></textarea>
+              <p class="text-[10px] text-gray-400 mt-1">개인정보가 포함되지 않았는지 확인해 주세요.</p>
+            </div>
+
+            <!-- 메모지 색상 선택 -->
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-2">메모지 색상</label>
+              <div class="flex items-center gap-3">
+                <!-- 노랑 -->
+                <label class="cursor-pointer text-center">
+                  <input type="radio" name="memoColor" value="#FEF9C3" class="sr-only peer" />
+                  <span class="block w-9 h-9 rounded-md bg-[#FEF9C3] border border-black/10 peer-checked:ring-2 peer-checked:ring-[#B04A36] peer-checked:scale-105 transition"></span>
+                  <span class="text-[10px] text-gray-500 mt-1 block">노랑</span>
+                </label>
+                <!-- 아이보리 (기본값) -->
+                <label class="cursor-pointer text-center">
+                  <input type="radio" name="memoColor" value="#FFFFFF" class="sr-only peer" checked />
+                  <span class="block w-9 h-9 rounded-md bg-[#FFFFFF] border border-black/10 peer-checked:ring-2 peer-checked:ring-[#B04A36] peer-checked:scale-105 transition flex items-center justify-center text-xs text-[#B04A36]">✓</span>
+                  <span class="text-[10px] text-gray-700 font-bold mt-1 block">아이보리</span>
+                </label>
+                <!-- 분홍 -->
+                <label class="cursor-pointer text-center">
+                  <input type="radio" name="memoColor" value="#FFE4E6" class="sr-only peer" />
+                  <span class="block w-9 h-9 rounded-md bg-[#FFE4E6] border border-black/10 peer-checked:ring-2 peer-checked:ring-[#B04A36] peer-checked:scale-105 transition"></span>
+                  <span class="text-[10px] text-gray-500 mt-1 block">분홍</span>
+                </label>
+                <!-- 하늘 -->
+                <label class="cursor-pointer text-center">
+                  <input type="radio" name="memoColor" value="#E0F2FE" class="sr-only peer" />
+                  <span class="block w-9 h-9 rounded-md bg-[#E0F2FE] border border-black/10 peer-checked:ring-2 peer-checked:ring-[#B04A36] peer-checked:scale-105 transition"></span>
+                  <span class="text-[10px] text-gray-500 mt-1 block">하늘</span>
+                </label>
+                <!-- 연두 -->
+                <label class="cursor-pointer text-center">
+                  <input type="radio" name="memoColor" value="#DCFCE7" class="sr-only peer" />
+                  <span class="block w-9 h-9 rounded-md bg-[#DCFCE7] border border-black/10 peer-checked:ring-2 peer-checked:ring-[#B04A36] peer-checked:scale-105 transition"></span>
+                  <span class="text-[10px] text-gray-500 mt-1 block">연두</span>
+                </label>
+                <!-- 보라 -->
+                <label class="cursor-pointer text-center">
+                  <input type="radio" name="memoColor" value="#F3E8FF" class="sr-only peer" />
+                  <span class="block w-9 h-9 rounded-md bg-[#F3E8FF] border border-black/10 peer-checked:ring-2 peer-checked:ring-[#B04A36] peer-checked:scale-105 transition"></span>
+                  <span class="text-[10px] text-gray-500 mt-1 block">보라</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 하단 버튼 바 -->
+            <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+              <button 
+                id="openDeleteModalBtn"
+                type="button" 
+                class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-xs font-semibold transition"
+              >
+                <span>🗑</span> 이 글 삭제
+              </button>
+              
+              <div class="flex items-center gap-2">
+                <a href="index.html" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs font-medium transition">
+                  취소
+                </a>
+                <button type="submit" class="bg-[#B04A36] hover:bg-[#973C2A] text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1 transition active:scale-95">
+                  <span>✓</span> 수정 내용 저장
+                </button>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <!-- [우측] 게시판 미리보기 (5컬럼) -->
+        <aside class="lg:col-span-5 flex flex-col gap-3">
+          <div class="flex items-center justify-between text-xs text-white/90 px-1">
+            <span class="font-bold">게시판 미리보기</span>
+            <span class="text-white/60 text-[11px]">실제 크기의 85%</span>
+          </div>
+
+          <!-- 미리보기 포스트잇 -->
+          <div id="previewCard" class="bg-white rounded-xl p-6 shadow-xl border border-white/40 flex flex-col justify-between min-h-[340px] transition-colors duration-200">
+            <div>
+              <span id="previewCategory" class="inline-block bg-[#F8E7D8] text-[#C25E2E] text-[10px] font-bold px-2 py-0.5 rounded-full mb-3">
+                동네 이야기
+              </span>
+              <h3 id="previewTitle" class="font-extrabold text-xl text-gray-900 mb-3 leading-snug">
+                제목을 입력해 주세요
+              </h3>
+              <p id="previewContent" class="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
+                내용을 입력하면 여기에 실시간으로 표시됩니다.
+              </p>
+            </div>
+            
+            <div class="flex items-center justify-between text-[11px] text-gray-400 pt-4 mt-6 border-t border-black/5">
+              <span class="font-medium text-gray-600">김소연</span>
+              <span class="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-500">작성/수정 중</span>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- 3. 삭제 확인 팝업 모달 (기본 hidden 추가) -->
+  <div id="deleteModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="flex items-start gap-3.5 mb-3">
+        <div class="w-9 h-9 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-sm font-bold flex-shrink-0">
+          🗑
+        </div>
+        <div>
+          <h4 class="font-bold text-gray-900 text-base">이 메모를 삭제할까요?</h4>
+          <p id="deleteModalDesc" class="text-xs text-gray-500 mt-1 leading-relaxed">
+            게시판에서 해당 메모가 완전히 사라집니다. 삭제한 글은 복구할 수 없어요.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 mt-6">
+        <button 
+          id="closeDeleteModalBtn"
+          type="button" 
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs font-semibold transition"
+        >
+          계속 편집
+        </button>
+        <button 
+          id="confirmDeleteBtn"
+          type="button" 
+          class="bg-[#B04A36] hover:bg-[#973C2A] text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1 transition active:scale-95"
+        >
+          <span>🗑</span> 영구 삭제
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 작성/수정 전용 스크립트 연결 -->
+  <script src="edit.js"></script>
+</body>
+</html>
