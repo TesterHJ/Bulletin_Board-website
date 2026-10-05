@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const contentInput = document.getElementById('contentInput');
   const colorRadios = document.querySelectorAll('input[name="memoColor"]');
   const openDeleteModalBtn = document.getElementById('openDeleteModalBtn');
+  const submitBtn = memoForm.querySelector('button[type="submit"]');
 
   // 카운터 및 타이틀
   const titleCounter = document.getElementById('titleCounter');
@@ -58,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     pageTitle.textContent = '내 메모 다듬기';
     tabEdit.className = 'text-[#B04A36] border-b-2 border-[#B04A36] pb-3 -mb-3';
     tabNew.className = 'text-gray-400 hover:text-gray-600 transition pb-3 -mb-3';
+    if (submitBtn) submitBtn.textContent = '수정 내용 저장';
 
     try {
       const res = await fetch(`/api/memo-detail?id=${memoId}`);
@@ -92,6 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     tabNew.className = 'text-[#B04A36] border-b-2 border-[#B04A36] pb-3 -mb-3';
     tabEdit.className = 'text-gray-400 hover:text-gray-600 transition pb-3 -mb-3';
     openDeleteModalBtn.classList.add('hidden'); // 새 글일 때는 삭제 버튼 숨김
+    if (submitBtn) submitBtn.textContent = '메모 붙이기'; // 신규 등록 버튼 문구로 변경
   }
 
   // 탭 클릭 시 경로 이동
@@ -107,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       category: categorySelect.value,
       content: contentInput.value.trim(),
       color: selectedColor,
-      author: '김소연'
+      author: '익명' // 기본 작성자 이름
     };
 
     if (!payload.title || !payload.content) {
@@ -125,12 +128,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         body: JSON.stringify(payload)
       });
 
-      if (!res.ok) throw new Error('저장에 실패했습니다.');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || errData.error || `서버 응답 오류 (${res.status})`);
+      }
 
       alert(memoId ? '메모가 수정되었습니다!' : '새 메모가 나무 벽에 붙었습니다!');
       window.location.href = memoId ? `detail.html?id=${memoId}` : 'index.html';
     } catch (err) {
-      alert(err.message);
+      alert(`저장 실패: ${err.message}`);
     }
   });
 
@@ -143,7 +149,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!memoId) return;
     try {
       const res = await fetch(`/api/memo-detail?id=${memoId}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('삭제에 실패했습니다.');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || errData.error || `삭제 실패 (${res.status})`);
+      }
 
       alert('메모가 삭제되었습니다.');
       window.location.href = 'index.html';
