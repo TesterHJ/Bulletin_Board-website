@@ -30,7 +30,7 @@ export default async function handler(req, res) {
 
       const newComment = {
         _id: new ObjectId(),
-        author: author || '김소연',
+        author: author || '익명',
         text: text.trim(),
         createdAt: new Date()
       };
@@ -42,11 +42,22 @@ export default async function handler(req, res) {
     // 3. 메모 수정 (PUT)
     if (req.method === 'PUT') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-      const { title, category, content, color } = body || {};
+      const { title, content, color } = body || {};
+
+      if (!title || !content) {
+        return res.status(400).json({ error: '제목과 내용을 입력해 주세요.' });
+      }
 
       await memosCollection.updateOne(
         { _id: memoId },
-        { $set: { title, category, content, color, updatedAt: new Date() } }
+        { 
+          $set: { 
+            title: title.trim(), 
+            content: content.trim(), 
+            color: color || '#FEF9C3', 
+            updatedAt: new Date() 
+          } 
+        }
       );
       return res.status(200).json({ success: true });
     }
