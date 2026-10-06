@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 폼 및 인풋
   const memoForm = document.getElementById('memoForm');
   const titleInput = document.getElementById('titleInput');
-  const categorySelect = document.getElementById('categorySelect');
   const contentInput = document.getElementById('contentInput');
   const colorRadios = document.querySelectorAll('input[name="memoColor"]');
   const openDeleteModalBtn = document.getElementById('openDeleteModalBtn');
@@ -20,7 +19,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 미리보기 요소
   const previewCard = document.getElementById('previewCard');
-  const previewCategory = document.getElementById('previewCategory');
   const previewTitle = document.getElementById('previewTitle');
   const previewContent = document.getElementById('previewContent');
 
@@ -35,10 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const val = e.target.value;
     previewTitle.textContent = val || '제목을 입력해 주세요';
     titleCounter.textContent = `${val.length} / 40`;
-  });
-
-  categorySelect.addEventListener('change', (e) => {
-    previewCategory.textContent = e.target.value;
   });
 
   contentInput.addEventListener('input', (e) => {
@@ -67,7 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const memo = await res.json();
 
       titleInput.value = memo.title;
-      categorySelect.value = memo.category || '동네 이야기';
       contentInput.value = memo.content;
 
       // 색상 세팅
@@ -79,7 +72,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // 미리보기 초기 반영
       previewTitle.textContent = memo.title;
-      previewCategory.textContent = memo.category || '동네 이야기';
       previewContent.textContent = memo.content;
       titleCounter.textContent = `${memo.title.length} / 40`;
       contentCounter.textContent = `${memo.content.length} / 2,000`;
@@ -93,8 +85,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     pageTitle.textContent = '새 메모 붙이기';
     tabNew.className = 'text-[#B04A36] border-b-2 border-[#B04A36] pb-3 -mb-3';
     tabEdit.className = 'text-gray-400 hover:text-gray-600 transition pb-3 -mb-3';
-    openDeleteModalBtn.classList.add('hidden'); // 새 글일 때는 삭제 버튼 숨김
-    if (submitBtn) submitBtn.textContent = '메모 붙이기'; // 신규 등록 버튼 문구로 변경
+    openDeleteModalBtn.classList.add('hidden');
+    if (submitBtn) submitBtn.textContent = '메모 붙이기';
   }
 
   // 탭 클릭 시 경로 이동
@@ -107,10 +99,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const selectedColor = document.querySelector('input[name="memoColor"]:checked')?.value || '#FFFFFF';
     const payload = {
       title: titleInput.value.trim(),
-      category: categorySelect.value,
       content: contentInput.value.trim(),
       color: selectedColor,
-      author: '익명' // 기본 작성자 이름
+      author: '익명'
     };
 
     if (!payload.title || !payload.content) {
