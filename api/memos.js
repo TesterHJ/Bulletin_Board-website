@@ -18,18 +18,17 @@ export default async function handler(req, res) {
 
     // 2. 새 메모 등록 (POST)
     if (req.method === 'POST') {
-      const { title, category, content, color, author } = req.body;
+      const { title, content, color, author } = req.body;
 
       if (!title || !content) {
         return res.status(400).json({ error: '제목과 내용을 모두 입력해 주세요.' });
       }
 
       const newMemo = {
-        title,
-        category: category || '동네 이야기',
-        content,
+        title: title.trim(),
+        content: content.trim(),
         color: color || '#FEF9C3', // 기본값: 노랑
-        author: author || '김소연',
+        author: author || '익명',
         createdAt: new Date(),
         views: 0,
         likes: 0,
