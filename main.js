@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     memoGrid.innerHTML = memos.map((memo, idx) => {
       const rot = rotations[idx % rotations.length];
       const commentCount = memo.comments ? memo.comments.length : 0;
-      const isTopMemo = idx === 1; // 2번째 메모를 데모 형태의 인기 메모로 표시 (필요시 수정 가능)
+      const isTopMemo = idx === 1; // 2번째 메모를 데모 형태의 인기 메모로 표시
 
       return `
         <article 
@@ -59,9 +59,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 오늘의 인기 메모
               </span>
             ` : ''}
-            <span class="block text-[10px] font-semibold text-gray-500 mb-1">
-              ${memo.category || '동네 이야기'}
-            </span>
             <h3 class="font-bold text-lg text-gray-900 mb-2 leading-snug break-words">
               ${escapeHtml(memo.title)}
             </h3>
@@ -70,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </p>
           </div>
           <div class="flex items-center justify-between text-[11px] text-gray-500 pt-4 mt-auto border-t border-black/5">
-            <span class="font-semibold text-gray-700">${escapeHtml(memo.author || '김소연')}</span>
+            <span class="font-semibold text-gray-700">${escapeHtml(memo.author || '익명')}</span>
             <span>댓글 ${commentCount}</span>
           </div>
         </article>
