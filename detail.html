@@ -34,14 +34,13 @@
       </nav>
     </div>
 
-    <!-- 유저 프로필 -->
+    <!-- 우측 방문자 뱃지 -->
     <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-full bg-[#E3FAFC] text-[#15AABF] flex items-center justify-center font-bold text-xs">
-        김
+      <div class="w-8 h-8 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center font-bold text-xs">
+        익명
       </div>
       <div class="text-xs text-right leading-tight">
-        <p class="font-semibold text-gray-800">김소연</p>
-        <p class="text-gray-400 text-[10px]">일반 회원</p>
+        <p class="font-semibold text-gray-800">방문자</p>
       </div>
     </div>
   </header>
@@ -68,11 +67,8 @@
         <!-- [좌측] 메모 상세 본문 카드 (8컬럼) -->
         <article id="memoArticleCard" class="lg:col-span-8 bg-[#FCFBF7] rounded-xl shadow-xl p-8 md:p-10 flex flex-col justify-between border border-[#EBE8DF] min-h-[580px] transition-colors">
           <div>
-            <!-- 상단 카테고리 태그 및 공유/신고 -->
-            <div class="flex items-center justify-between mb-4">
-              <span id="memoCategory" class="bg-[#F8E7D8] text-[#C25E2E] text-xs font-semibold px-2.5 py-1 rounded-md">
-                동네 이야기
-              </span>
+            <!-- 상단 공유/신고 (카테고리 제거됨) -->
+            <div class="flex items-center justify-end mb-4">
               <div class="flex items-center gap-3 text-xs text-gray-400">
                 <button type="button" onclick="navigator.clipboard.writeText(window.location.href); alert('링크가 복사되었습니다!');" class="hover:text-gray-700 transition">공유</button>
                 <button type="button" onclick="alert('신고가 접수되었습니다.');" class="hover:text-gray-700 transition">신고</button>
@@ -127,8 +123,8 @@
           <!-- 댓글 입력 폼 -->
           <div class="bg-[#F8F9FA] rounded-lg p-3 border border-gray-200 mb-4">
             <div class="flex items-center gap-1.5 mb-2">
-              <span class="w-3.5 h-3.5 rounded-full bg-[#E3FAFC] text-[#15AABF] text-[9px] font-bold flex items-center justify-center">김</span>
-              <span class="text-[11px] font-semibold text-gray-700">김소연으로 댓글 남기기</span>
+              <span class="w-3.5 h-3.5 rounded-full bg-stone-200 text-stone-600 text-[9px] font-bold flex items-center justify-center">익</span>
+              <span class="text-[11px] font-semibold text-gray-700">댓글 남기기</span>
             </div>
             <textarea 
               id="commentInput"

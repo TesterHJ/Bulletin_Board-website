@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // DOM 요소 선택
   const memoNumber = document.getElementById('memoNumber');
   const memoViews = document.getElementById('memoViews');
-  const memoCategory = document.getElementById('memoCategory');
   const memoTitle = document.getElementById('memoTitle');
   const memoAuthor = document.getElementById('memoAuthor');
   const memoDate = document.getElementById('memoDate');
@@ -39,24 +38,25 @@ document.addEventListener('DOMContentLoaded', async () => {
       const memo = await res.json();
 
       // 화면에 데이터 채우기
-      memoNumber.textContent = `메모 #${memo._id.slice(-4)}`;
-      memoViews.textContent = `조회 ${memo.views || 0}`;
-      memoCategory.textContent = memo.category || '동네 이야기';
-      memoTitle.textContent = memo.title;
-      memoAuthor.textContent = memo.author || '익명';
-      authorAvatar.textContent = (memo.author || '익')[0];
+      if (memoNumber) memoNumber.textContent = `메모 #${memo._id.slice(-4)}`;
+      if (memoViews) memoViews.textContent = `조회 ${memo.views || 0}`;
+      if (memoTitle) memoTitle.textContent = memo.title;
+      if (memoAuthor) memoAuthor.textContent = memo.author || '익명';
+      if (authorAvatar) authorAvatar.textContent = (memo.author || '익')[0];
       
       const createdDate = memo.createdAt ? new Date(memo.createdAt) : new Date();
-      memoDate.textContent = createdDate.toLocaleString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      if (memoDate) {
+        memoDate.textContent = createdDate.toLocaleString('ko-KR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
 
-      memoContent.textContent = memo.content;
-      likeCount.textContent = memo.likes || 0;
+      if (memoContent) memoContent.textContent = memo.content;
+      if (likeCount) likeCount.textContent = memo.likes || 0;
 
       // 댓글 리스트 렌더링
       renderComments(memo.comments || []);
@@ -68,32 +68,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 2. 댓글 렌더링 함수
   function renderComments(comments) {
-    commentTotalCount.textContent = comments.length;
+    if (commentTotalCount) commentTotalCount.textContent = comments.length;
 
-    if (comments.length === 0) {
+    if (!comments || comments.length === 0) {
       commentList.innerHTML = `<div class="text-center text-xs text-gray-400 py-8">첫 댓글을 남겨보세요!</div>`;
       return;
     }
 
     commentList.innerHTML = comments.map(comment => {
-      const isMe = comment.author === '김소연';
-      const initial = comment.author ? comment.author[0] : '익';
+      const authorName = comment.author || '익명';
+      const initial = authorName[0];
       const timeStr = comment.createdAt ? new Date(comment.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '';
 
       return `
         <div class="flex items-start gap-2.5 text-xs">
-          <div class="w-6 h-6 rounded-full bg-[#E3FAFC] text-[#15AABF] flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">
+          <div class="w-6 h-6 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">
             ${initial}
           </div>
           <div class="flex-1">
             <div class="flex items-center justify-between mb-1">
-              <div class="flex items-center gap-1">
-                <span class="font-bold text-gray-800">${comment.author}</span>
-                ${isMe ? `<span class="text-[10px] text-[#15AABF] font-semibold bg-[#E3FAFC] px-1 rounded">나</span>` : ''}
-              </div>
+              <span class="font-bold text-gray-800">${escapeHtml(authorName)}</span>
               <span class="text-[10px] text-gray-400">${timeStr}</span>
             </div>
-            <p class="text-gray-600 text-[12px] leading-relaxed whitespace-pre-line">${comment.text}</p>
+            <p class="text-gray-600 text-[12px] leading-relaxed whitespace-pre-line">${escapeHtml(comment.text)}</p>
           </div>
         </div>
       `;
@@ -117,7 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await fetch(`/api/memo-detail?id=${memoId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, author: '김소연' })
+        body: JSON.stringify({ text, author: '익명' })
       });
 
       if (!res.ok) throw new Error('댓글 등록에 실패했습니다.');
@@ -129,6 +126,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert(err.message);
     }
   });
+
+  // XSS 방지용 이스케이프 헬퍼
+  function escapeHtml(text) {
+    if (!text) return '';
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
   // 최초 로드 실행
   loadMemoDetail();
