@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const memoId = urlParams.get('id');
 
-  // 폼 및 인풋
   const memoForm = document.getElementById('memoForm');
   const titleInput = document.getElementById('titleInput');
   const contentInput = document.getElementById('contentInput');
@@ -10,25 +9,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   const openDeleteModalBtn = document.getElementById('openDeleteModalBtn');
   const submitBtn = memoForm.querySelector('button[type="submit"]');
 
-  // 카운터 및 타이틀
   const titleCounter = document.getElementById('titleCounter');
   const contentCounter = document.getElementById('contentCounter');
   const pageTitle = document.getElementById('pageTitle');
   const tabNew = document.getElementById('tabNew');
   const tabEdit = document.getElementById('tabEdit');
 
-  // 미리보기 요소
   const previewCard = document.getElementById('previewCard');
   const previewTitle = document.getElementById('previewTitle');
   const previewContent = document.getElementById('previewContent');
 
-  // 모달 요소
   const deleteModal = document.getElementById('deleteModal');
   const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
   const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
   const deleteModalDesc = document.getElementById('deleteModalDesc');
 
-  // 1. 실시간 미리보기 동기화
+  // 실시간 미리보기
   titleInput.addEventListener('input', (e) => {
     const val = e.target.value;
     previewTitle.textContent = val || '제목을 입력해 주세요';
@@ -47,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 2. 신규 작성 vs 기존 수정 모드 분기
+  // 작성/수정 모드 판별
   if (memoId) {
     pageTitle.textContent = '내 메모 다듬기';
     tabEdit.className = 'text-[#B04A36] border-b-2 border-[#B04A36] pb-3 -mb-3';
@@ -58,6 +54,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await fetch(`/api/memo-detail?id=${memoId}`);
       if (!res.ok) throw new Error('메모를 불러올 수 없습니다.');
       const memo = await res.json();
+
+      const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+      
+      // 본인 글인지 프론트에서 먼저 검증
+      if (!currentUser || currentUser.nickname !== memo.author) {
+        alert('본인이 작성한 메모만 수정할 수 있습니다.');
+        window.location.href = `detail.html?id=${memoId}`;
+        return;
+      }
 
       titleInput.value = memo.title;
       contentInput.value = memo.content;
@@ -87,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   tabNew.addEventListener('click', () => { window.location.href = 'edit.html'; });
 
-  // 3. 폼 제출 (저장/수정)
+  // 폼 제출 (저장/수정)
   memoForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -98,7 +103,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       title: titleInput.value.trim(),
       content: contentInput.value.trim(),
       color: selectedColor,
-      author: currentUser ? currentUser.nickname : '익명'
+      author: currentUser ? currentUser.nickname : '익명',
+      requester: currentUser ? currentUser.nickname : null // 수정 요청자 전달
     };
 
     if (!payload.title || !payload.content) {
@@ -116,9 +122,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         body: JSON.stringify(payload)
       });
 
+      const resData = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || errData.error || `서버 응답 오류 (${res.status})`);
+        throw new Error(resData.error || resData.message || `서버 응답 오류 (${res.status})`);
       }
 
       alert(memoId ? '메모가 수정되었습니다!' : '새 메모가 나무 벽에 붙었습니다!');
@@ -128,18 +134,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 4. 모달 열기/닫기
+  // 모달 제어
   openDeleteModalBtn.addEventListener('click', () => deleteModal.classList.remove('hidden'));
   closeDeleteModalBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
 
-  // 5. 영구 삭제 처리
+  // 영구 삭제 처리
   confirmDeleteBtn.addEventListener('click', async () => {
     if (!memoId) return;
+
+    const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+
     try {
-      const res = await fetch(`/api/memo-detail?id=${memoId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/memo-detail?id=${memoId}`, { 
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requester: currentUser ? currentUser.nickname : null
+        })
+      });
+
+      const resData = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || errData.error || `삭제 실패 (${res.status})`);
+        throw new Error(resData.error || `삭제 실패 (${res.status})`);
       }
 
       alert('메모가 삭제되었습니다.');

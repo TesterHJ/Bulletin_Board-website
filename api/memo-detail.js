@@ -39,13 +39,22 @@ export default async function handler(req, res) {
       return res.status(201).json({ success: true, comment: newComment });
     }
 
-    // 3. 메모 수정 (PUT)
+    // 3. 메모 수정 (PUT) - 작성자 일치 검증
     if (req.method === 'PUT') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-      const { title, content, color } = body || {};
+      const { title, content, color, requester } = body || {};
 
       if (!title || !content) {
         return res.status(400).json({ error: '제목과 내용을 입력해 주세요.' });
+      }
+
+      // 기존 메모 조회 및 작성자 대조
+      const existingMemo = await memosCollection.findOne({ _id: memoId });
+      if (!existingMemo) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
+
+      // 익명 글이거나 본인이 쓴 글이 아니면 거부
+      if (existingMemo.author === '익명' || existingMemo.author !== requester) {
+        return res.status(403).json({ error: '본인이 작성한 메모만 수정할 수 있습니다.' });
       }
 
       await memosCollection.updateOne(
@@ -62,8 +71,18 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true });
     }
 
-    // 4. 메모 삭제 (DELETE)
+    // 4. 메모 삭제 (DELETE) - 작성자 일치 검증
     if (req.method === 'DELETE') {
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+      const { requester } = body || {};
+
+      const existingMemo = await memosCollection.findOne({ _id: memoId });
+      if (!existingMemo) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
+
+      if (existingMemo.author === '익명' || existingMemo.author !== requester) {
+        return res.status(403).json({ error: '본인이 작성한 메모만 삭제할 수 있습니다.' });
+      }
+
       await memosCollection.deleteOne({ _id: memoId });
       return res.status(200).json({ success: true });
     }

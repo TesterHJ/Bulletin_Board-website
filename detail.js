@@ -33,6 +33,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!res.ok) throw new Error('메모를 불러올 수 없습니다.');
       const memo = await res.json();
 
+      const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+
+      // 본인 글이 아니거나 로그인하지 않은 경우 [수정] 버튼 숨기기
+      if (!currentUser || currentUser.nickname !== memo.author) {
+        if (editLink) editLink.style.display = 'none';
+      } else {
+        if (editLink) editLink.style.display = 'inline-block';
+      }
+
       if (memoNumber) memoNumber.textContent = `메모 #${memo._id.slice(-4)}`;
       if (memoViews) memoViews.textContent = `조회 ${memo.views || 0}`;
       if (memoTitle) memoTitle.textContent = memo.title;
