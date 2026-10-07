@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  // URL에서 id 파라미터 추출
   const urlParams = new URLSearchParams(window.location.search);
   const memoId = urlParams.get('id');
 
@@ -9,7 +8,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // DOM 요소 선택
   const memoNumber = document.getElementById('memoNumber');
   const memoViews = document.getElementById('memoViews');
   const memoTitle = document.getElementById('memoTitle');
@@ -20,14 +18,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const likeCount = document.getElementById('likeCount');
   const editLink = document.getElementById('editLink');
 
-  // 댓글 관련 DOM
   const commentTotalCount = document.getElementById('commentTotalCount');
   const commentList = document.getElementById('commentList');
   const commentInput = document.getElementById('commentInput');
   const commentCharCount = document.getElementById('commentCharCount');
   const submitCommentBtn = document.getElementById('submitCommentBtn');
 
-  // 수정 버튼 링크 연결
   editLink.href = `edit.html?id=${memoId}`;
 
   // 1. 메모 상세 정보 불러오기
@@ -37,7 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!res.ok) throw new Error('메모를 불러올 수 없습니다.');
       const memo = await res.json();
 
-      // 화면에 데이터 채우기
       if (memoNumber) memoNumber.textContent = `메모 #${memo._id.slice(-4)}`;
       if (memoViews) memoViews.textContent = `조회 ${memo.views || 0}`;
       if (memoTitle) memoTitle.textContent = memo.title;
@@ -58,7 +53,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (memoContent) memoContent.textContent = memo.content;
       if (likeCount) likeCount.textContent = memo.likes || 0;
 
-      // 댓글 리스트 렌더링
       renderComments(memo.comments || []);
     } catch (err) {
       alert(err.message);
@@ -75,9 +69,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+
     commentList.innerHTML = comments.map(comment => {
       const authorName = comment.author || '익명';
       const initial = authorName[0];
+      const isMe = currentUser && currentUser.nickname === authorName;
       const timeStr = comment.createdAt ? new Date(comment.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '';
 
       return `
@@ -87,7 +84,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <div class="flex-1">
             <div class="flex items-center justify-between mb-1">
-              <span class="font-bold text-gray-800">${escapeHtml(authorName)}</span>
+              <div class="flex items-center gap-1">
+                <span class="font-bold text-gray-800">${escapeHtml(authorName)}</span>
+                ${isMe ? `<span class="text-[10px] text-[#15AABF] font-semibold bg-[#E3FAFC] px-1 rounded">나</span>` : ''}
+              </div>
               <span class="text-[10px] text-gray-400">${timeStr}</span>
             </div>
             <p class="text-gray-600 text-[12px] leading-relaxed whitespace-pre-line">${escapeHtml(comment.text)}</p>
@@ -97,12 +97,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).join('');
   }
 
-  // 3. 댓글 글자 수 카운터
   commentInput.addEventListener('input', (e) => {
     commentCharCount.textContent = `${e.target.value.length}/300`;
   });
 
-  // 4. 댓글 등록 API 호출
+  // 3. 댓글 등록 API 호출
   submitCommentBtn.addEventListener('click', async () => {
     const text = commentInput.value.trim();
     if (!text) {
@@ -110,24 +109,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+
     try {
       const res = await fetch(`/api/memo-detail?id=${memoId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, author: '익명' })
+        body: JSON.stringify({ 
+          text, 
+          author: currentUser ? currentUser.nickname : '익명' 
+        })
       });
 
       if (!res.ok) throw new Error('댓글 등록에 실패했습니다.');
 
       commentInput.value = '';
       commentCharCount.textContent = '0/300';
-      loadMemoDetail(); // 댓글 새로고침
+      loadMemoDetail();
     } catch (err) {
       alert(err.message);
     }
   });
 
-  // XSS 방지용 이스케이프 헬퍼
   function escapeHtml(text) {
     if (!text) return '';
     return text
@@ -138,6 +141,5 @@ document.addEventListener('DOMContentLoaded', async () => {
       .replace(/'/g, '&#039;');
   }
 
-  // 최초 로드 실행
   loadMemoDetail();
 });

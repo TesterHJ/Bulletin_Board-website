@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 2. 신규 작성 vs 기존 수정 모드 분기
   if (memoId) {
-    // [수정 모드]
     pageTitle.textContent = '내 메모 다듬기';
     tabEdit.className = 'text-[#B04A36] border-b-2 border-[#B04A36] pb-3 -mb-3';
     tabNew.className = 'text-gray-400 hover:text-gray-600 transition pb-3 -mb-3';
@@ -63,14 +62,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       titleInput.value = memo.title;
       contentInput.value = memo.content;
 
-      // 색상 세팅
       const targetRadio = document.querySelector(`input[name="memoColor"][value="${memo.color}"]`);
       if (targetRadio) {
         targetRadio.checked = true;
         previewCard.style.backgroundColor = memo.color;
       }
 
-      // 미리보기 초기 반영
       previewTitle.textContent = memo.title;
       previewContent.textContent = memo.content;
       titleCounter.textContent = `${memo.title.length} / 40`;
@@ -81,7 +78,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.location.href = 'index.html';
     }
   } else {
-    // [신규 작성 모드]
     pageTitle.textContent = '새 메모 붙이기';
     tabNew.className = 'text-[#B04A36] border-b-2 border-[#B04A36] pb-3 -mb-3';
     tabEdit.className = 'text-gray-400 hover:text-gray-600 transition pb-3 -mb-3';
@@ -89,7 +85,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (submitBtn) submitBtn.textContent = '메모 붙이기';
   }
 
-  // 탭 클릭 시 경로 이동
   tabNew.addEventListener('click', () => { window.location.href = 'edit.html'; });
 
   // 3. 폼 제출 (저장/수정)
@@ -97,11 +92,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault();
 
     const selectedColor = document.querySelector('input[name="memoColor"]:checked')?.value || '#FFFFFF';
+    const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+
     const payload = {
       title: titleInput.value.trim(),
       content: contentInput.value.trim(),
       color: selectedColor,
-      author: '익명'
+      author: currentUser ? currentUser.nickname : '익명'
     };
 
     if (!payload.title || !payload.content) {

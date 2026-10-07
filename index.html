@@ -3,41 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>나무메모 - 게시판</title>
+  <title>나무메모 - 따뜻한 이야기 벽</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- 눈누/Pretendard 폰트 -->
+  <!-- Pretendard 폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
   <style>
     body {
       font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     }
-    /* 나무/우드 질감 배경 */
     .wood-board {
       background: radial-gradient(circle at 50% 30%, #a27b5c 0%, #7d5a3c 60%, #563d27 100%);
       box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.4);
     }
-    /* 메모지 압정 효과 */
     .pin {
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle at 35% 35%, #ff8787 0%, #e03131 70%, #9b1c1c 100%);
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #ff7675, #d63031);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
     }
   </style>
 </head>
 <body class="bg-[#F8F9FA] text-[#2D3436] min-h-screen flex flex-col">
 
-  <!-- 1. 네비게이션 헤더 -->
+  <!-- 상단 네비게이션 헤더 -->
   <header class="bg-white border-b border-[#E9ECEF] sticky top-0 z-50 px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-8">
-      <!-- 로고 -->
       <a href="index.html" class="flex items-center gap-2 text-xl font-bold text-[#2D3436]">
         <span class="w-7 h-7 rounded-full bg-[#82C91E]/20 text-[#5C940D] flex items-center justify-center text-sm font-black">▲</span>
         나무메모
       </a>
-      <!-- 메뉴 -->
       <nav class="flex gap-6 text-sm font-medium">
         <a href="index.html" class="text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1">게시판</a>
         <a href="edit.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">새 메모</a>
@@ -45,71 +41,48 @@
       </nav>
     </div>
 
-    <!-- 유저 프로필 -->
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-full bg-[#E3FAFC] text-[#15AABF] flex items-center justify-center font-bold text-xs">
-        김
-      </div>
-      <div class="text-xs text-right leading-tight">
-        <p class="font-semibold text-gray-800">김소연</p>
-        <p class="text-gray-400 text-[10px]">일반 회원</p>
-      </div>
-    </div>
+    <!-- 우측 프로필/인증 영역 -->
+    <div id="userProfileContainer"></div>
   </header>
 
-  <!-- 2. 메인 나무 보드 섹션 -->
-  <main class="wood-board flex-1 p-6 md:p-10 relative overflow-hidden flex flex-col justify-between">
-    <div class="max-w-7xl mx-auto w-full">
+  <!-- 메인 게시판 영역 -->
+  <main class="wood-board flex-1 p-6 md:p-10 flex flex-col items-center">
+    <div class="max-w-6xl w-full">
 
-      <!-- 상단 컨트롤 바 -->
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <!-- 상단 바: 검색 및 글 카운트 -->
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
         <div>
-          <span class="text-xs uppercase tracking-wider text-[#E9ECEF]/80 font-semibold">OUR LITTLE WALL · 2026년 10월</span>
-          <h1 class="text-3xl md:text-4xl font-extrabold text-white mt-1 drop-shadow-sm">
-            오늘, 어떤 이야기를 남길까요?
-          </h1>
+          <h1 class="text-2xl font-extrabold text-white drop-shadow-sm">나무 벽 게시판</h1>
+          <p id="memoCountText" class="text-xs text-white/80 mt-1">오늘 등록된 이야기를 불러오는 중입니다...</p>
         </div>
 
-        <div class="flex items-center gap-3">
-          <!-- 검색창 -->
-          <div class="relative w-64 md:w-80">
-            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400 text-sm">🔍</span>
-            <input 
-              id="searchInput"
-              type="text" 
-              placeholder="제목, 내용, 작성자 검색" 
-              class="w-full bg-white/90 focus:bg-white text-sm rounded-lg pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#D9480F] shadow-sm transition placeholder:text-gray-400"
-            />
-          </div>
-          <!-- 새 메모 버튼 -->
-          <a href="edit.html" class="bg-[#B04A36] hover:bg-[#973C2A] text-white px-4 py-2.5 rounded-lg text-sm font-semibold shadow-md flex items-center gap-1.5 transition active:scale-95 whitespace-nowrap">
-            <span>+</span> 새 메모 붙이기
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="제목, 내용, 작성자 검색..." 
+            class="bg-white/90 focus:bg-white text-xs px-4 py-2 rounded-full border border-stone-200 outline-none w-full md:w-64 shadow-sm transition placeholder:text-stone-400"
+          />
+          <a 
+            href="edit.html" 
+            class="whitespace-nowrap bg-[#B04A36] hover:bg-[#973C2A] text-white text-xs font-bold px-4 py-2 rounded-full shadow transition"
+          >
+            + 새 메모
           </a>
         </div>
       </div>
 
-      <!-- 포스트잇 동적 그리드 목록 -->
-      <div id="memoGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start min-h-[300px]">
-        <div class="col-span-full text-center text-white/80 py-20 font-medium">
-          나무 벽에 붙은 메모들을 불러오는 중입니다...
+      <!-- 메모 포스트잇 그리드 -->
+      <div id="memoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div class="col-span-full text-center text-white/80 py-20">
+          메모를 불러오는 중입니다...
         </div>
       </div>
-    </div>
 
-    <!-- 하단 상태 및 페이징 바 -->
-    <div class="max-w-7xl mx-auto w-full flex items-center justify-between text-xs text-[#E9ECEF]/90 mt-12 pt-4 border-t border-white/10">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-        <span id="memoCountText">오늘 0개의 이야기가 새로 붙었어요</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <span id="pageInfo">1 / 1</span>
-        <button class="hover:underline flex items-center gap-1 font-semibold text-white">다음 벽 →</button>
-      </div>
     </div>
   </main>
 
-  <!-- 메인 프론트엔드 연동 스크립트 -->
+  <script src="auth.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

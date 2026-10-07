@@ -4,9 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>나무메모 - 상세 보기</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Pretendard 폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
   <style>
     body {
@@ -20,7 +18,7 @@
 </head>
 <body class="bg-[#F8F9FA] text-[#2D3436] min-h-screen flex flex-col">
 
-  <!-- 1. 최상단 네비게이션 헤더 -->
+  <!-- 1. 헤더 -->
   <header class="bg-white border-b border-[#E9ECEF] sticky top-0 z-50 px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-8">
       <a href="index.html" class="flex items-center gap-2 text-xl font-bold text-[#2D3436]">
@@ -34,22 +32,14 @@
       </nav>
     </div>
 
-    <!-- 우측 방문자 뱃지 -->
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center font-bold text-xs">
-        익명
-      </div>
-      <div class="text-xs text-right leading-tight">
-        <p class="font-semibold text-gray-800">방문자</p>
-      </div>
-    </div>
+    <!-- 우측 프로필/인증 컨테이너 -->
+    <div id="userProfileContainer"></div>
   </header>
 
-  <!-- 2. 메인 컨텐츠 영역 -->
+  <!-- 2. 본문 컨텐츠 -->
   <main class="wood-board flex-1 p-4 md:p-8 flex flex-col items-center">
     <div class="max-w-6xl w-full">
 
-      <!-- 상단 액션/메타 바 -->
       <div class="flex items-center justify-between text-xs text-white/90 mb-4 px-1">
         <a href="index.html" class="hover:underline flex items-center gap-1.5 font-medium">
           <span>←</span> 게시판으로 돌아가기
@@ -61,13 +51,11 @@
         </div>
       </div>
 
-      <!-- 본문 컨텐츠 영역 (좌: 카드 / 우: 댓글) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-        <!-- [좌측] 메모 상세 본문 카드 (8컬럼) -->
+        <!-- 좌측 메모 상세 카드 -->
         <article id="memoArticleCard" class="lg:col-span-8 bg-[#FCFBF7] rounded-xl shadow-xl p-8 md:p-10 flex flex-col justify-between border border-[#EBE8DF] min-h-[580px] transition-colors">
           <div>
-            <!-- 상단 공유/신고  -->
             <div class="flex items-center justify-end mb-4">
               <div class="flex items-center gap-3 text-xs text-gray-400">
                 <button type="button" onclick="navigator.clipboard.writeText(window.location.href); alert('링크가 복사되었습니다!');" class="hover:text-gray-700 transition">공유</button>
@@ -75,12 +63,10 @@
               </div>
             </div>
 
-            <!-- 제목 -->
             <h1 id="memoTitle" class="text-2xl md:text-3xl font-extrabold text-[#212529] mb-4 tracking-tight leading-snug">
               제목을 불러오는 중입니다...
             </h1>
 
-            <!-- 작성자 프로필 -->
             <div class="flex items-center gap-3 pb-6 mb-6 border-b border-[#E9ECEF]">
               <div id="authorAvatar" class="w-10 h-10 rounded-full bg-[#F59F00]/20 text-[#D9480F] flex items-center justify-center font-bold text-sm">
                 ?
@@ -91,13 +77,11 @@
               </div>
             </div>
 
-            <!-- 본문 내용 -->
             <div id="memoContent" class="space-y-4 text-[15px] leading-relaxed text-[#343A40] whitespace-pre-line">
               내용을 불러오고 있습니다...
             </div>
           </div>
 
-          <!-- 하단 버튼 영역 -->
           <div class="flex items-center justify-between pt-8 mt-8 border-t border-[#E9ECEF]">
             <button id="likeBtn" type="button" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#FFD8D8] text-[#E03131] hover:bg-[#FFF5F5] transition text-xs font-semibold shadow-sm active:scale-95">
               <span>♡</span> 마음 <span id="likeCount">0</span>
@@ -113,17 +97,15 @@
           </div>
         </article>
 
-        <!-- [우측] 댓글 패널 (4컬럼) -->
+        <!-- 우측 댓글 영역 -->
         <aside class="lg:col-span-4 bg-white rounded-xl shadow-xl p-5 border border-gray-100 flex flex-col min-h-[580px]">
           <div class="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
             <h2 class="font-bold text-gray-900 text-sm">댓글 <span id="commentTotalCount" class="text-[#D9480F]">0</span></h2>
             <span class="text-xs text-gray-400">등록순</span>
           </div>
 
-          <!-- 댓글 입력 폼 -->
           <div class="bg-[#F8F9FA] rounded-lg p-3 border border-gray-200 mb-4">
             <div class="flex items-center gap-1.5 mb-2">
-              <span class="w-3.5 h-3.5 rounded-full bg-stone-200 text-stone-600 text-[9px] font-bold flex items-center justify-center">익</span>
               <span class="text-[11px] font-semibold text-gray-700">댓글 남기기</span>
             </div>
             <textarea 
@@ -141,7 +123,6 @@
             </div>
           </div>
 
-          <!-- 댓글 동적 렌더링 리스트 -->
           <div id="commentList" class="space-y-4 flex-1 overflow-y-auto pr-1">
             <div class="text-center text-xs text-gray-400 py-8">등록된 댓글이 없습니다.</div>
           </div>
@@ -151,7 +132,7 @@
     </div>
   </main>
 
-  <!-- 상세 페이지 전용 스크립트 -->
+  <script src="auth.js"></script>
   <script src="detail.js"></script>
 </body>
 </html>
