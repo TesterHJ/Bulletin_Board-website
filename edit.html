@@ -27,7 +27,7 @@
 </head>
 <body class="bg-[#F8F9FA] text-[#2D3436] min-h-screen flex flex-col">
 
-  <!-- 상단 네비게이션 헤더 -->
+  <!-- 1. 상단 네비게이션 헤더 -->
   <header class="bg-white border-b border-[#E9ECEF] sticky top-0 z-50 px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-8">
       <a href="index.html" class="flex items-center gap-2 text-xl font-bold text-[#2D3436]">
@@ -45,9 +45,9 @@
     <div id="userProfileContainer"></div>
   </header>
 
-  <!-- 메인 작업 영역 -->
+  <!-- 2. 메인 작업 영역 -->
   <main class="wood-board flex-1 p-6 md:p-10 flex flex-col items-center justify-center">
-    <div class="max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-stone-200">
+    <div class="max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-stone-200 my-auto">
 
       <!-- 상단 모드 탭 -->
       <div class="flex border-b border-gray-200 px-6 pt-4 text-sm font-bold gap-6 bg-stone-50/50">
@@ -55,7 +55,7 @@
         <button id="tabEdit" type="button" class="pb-3 -mb-[1px] border-b-2 transition">내 메모 다듬기</button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 p-6 md:p-8">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 p-6 md:p-8 items-start">
         <!-- 좌측: 입력 폼 (7컬럼) -->
         <form id="memoForm" class="md:col-span-7 space-y-5">
           <h2 id="pageTitle" class="text-xl font-extrabold text-gray-900">새 메모 붙이기</h2>
@@ -107,7 +107,7 @@
               <label class="cursor-pointer">
                 <input type="radio" name="memoColor" value="#E0F2FE" class="hidden peer" />
                 <span class="w-7 h-7 rounded-full bg-[#E0F2FE] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition"></span>
-              </md:label>
+              </label>
               <label class="cursor-pointer">
                 <input type="radio" name="memoColor" value="#FCE7F3" class="hidden peer" />
                 <span class="w-7 h-7 rounded-full bg-[#FCE7F3] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition"></span>
@@ -115,7 +115,7 @@
             </div>
           </div>
 
-          <!-- 하단 버튼 -->
+          <!-- 하단 버튼 영역 -->
           <div class="flex items-center justify-between pt-4 border-t border-gray-100">
             <button 
               type="button" 
