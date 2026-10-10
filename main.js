@@ -26,6 +26,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // 오늘 날짜의 자정(00:00:00) 기준 구하기
+  function getStartOfToday() {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  }
+
   // 2. 메모 카드 그리드 렌더링 함수
   function renderMemos(memos) {
     if (memoCountText) {
@@ -41,10 +47,37 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    // --- 당일 최다 공감(likes) 메모 선정 로직 ---
+    const startOfToday = getStartOfToday();
+
+    // 1) 오늘 등록된 글 중 공감(likes)이 1개 이상인 글들
+    const todayMemosWithLikes = allMemos.filter(memo => {
+      const created = memo.createdAt ? new Date(memo.createdAt).getTime() : 0;
+      return created >= startOfToday && (memo.likes || 0) > 0;
+    });
+
+    let topMemoId = null;
+
+    if (todayMemosWithLikes.length > 0) {
+      // 오늘 글 중 공감 수가 가장 많은 메모 선정
+      todayMemosWithLikes.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+      topMemoId = todayMemosWithLikes[0]._id;
+    } else {
+      // 오늘 공감 글이 없을 경우: 전체 메모 중 공감 1개 이상인 최다 공감 메모를 선정 (폴백)
+      const overallWithLikes = allMemos
+        .filter(memo => (memo.likes || 0) > 0)
+        .sort((a, b) => (b.likes || 0) - (a.likes || 0));
+
+      if (overallWithLikes.length > 0) {
+        topMemoId = overallWithLikes[0]._id;
+      }
+    }
+
     memoGrid.innerHTML = memos.map((memo, idx) => {
       const rot = rotations[idx % rotations.length];
       const commentCount = memo.comments ? memo.comments.length : 0;
-      const isTopMemo = idx === 1; // 2번째 메모를 데모 형태의 인기 메모로 표시
+      const likeCount = memo.likes || 0;
+      const isTopMemo = topMemoId && memo._id === topMemoId;
 
       return `
         <article 
@@ -55,8 +88,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div class="pin absolute -top-1.5 left-1/2 -translate-x-1/2"></div>
           <div>
             ${isTopMemo ? `
-              <span class="inline-block bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full mb-2">
-                오늘의 인기 메모
+              <span class="inline-flex items-center gap-1 bg-[#D9480F] text-white text-[10px] font-bold px-2 py-0.5 rounded-full mb-2 shadow-sm">
+                <span>★</span> 오늘의 인기 메모
               </span>
             ` : ''}
             <h3 class="font-bold text-lg text-gray-900 mb-2 leading-snug break-words">
@@ -68,7 +101,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <div class="flex items-center justify-between text-[11px] text-gray-500 pt-4 mt-auto border-t border-black/5">
             <span class="font-semibold text-gray-700">${escapeHtml(memo.author || '익명')}</span>
-            <span>댓글 ${commentCount}</span>
+            <div class="flex items-center gap-2 text-stone-500 text-[10px]">
+              <span>♡ ${likeCount}</span>
+              <span>댓글 ${commentCount}</span>
+            </div>
           </div>
         </article>
       `;
