@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const titleCounter = document.getElementById('titleCounter');
   const contentCounter = document.getElementById('contentCounter');
   const pageTitle = document.getElementById('pageTitle');
-  const tabNew = document.getElementById('tabNew');
-  const tabEdit = document.getElementById('tabEdit');
 
   const previewCard = document.getElementById('previewCard');
   const previewTitle = document.getElementById('previewTitle');
@@ -24,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
   const deleteModalDesc = document.getElementById('deleteModalDesc');
 
-  // 실시간 미리보기
+  // 실시간 미리보기 동기화
   titleInput.addEventListener('input', (e) => {
     const val = e.target.value;
     previewTitle.textContent = val || '제목을 입력해 주세요';
@@ -43,11 +41,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 작성/수정 모드 판별
+  // 작성 / 수정 모드 분기
   if (memoId) {
     pageTitle.textContent = '내 메모 다듬기';
-    tabEdit.className = 'text-[#B04A36] border-b-2 border-[#B04A36] pb-3 -mb-3';
-    tabNew.className = 'text-gray-400 hover:text-gray-600 transition pb-3 -mb-3';
     if (submitBtn) submitBtn.textContent = '수정 내용 저장';
 
     try {
@@ -57,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
       
-      // 본인 글인지 프론트에서 먼저 검증
+      // 본인 작성 메모 여부 검증
       if (!currentUser || currentUser.nickname !== memo.author) {
         alert('본인이 작성한 메모만 수정할 수 있습니다.');
         window.location.href = `detail.html?id=${memoId}`;
@@ -84,15 +80,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } else {
     pageTitle.textContent = '새 메모 붙이기';
-    tabNew.className = 'text-[#B04A36] border-b-2 border-[#B04A36] pb-3 -mb-3';
-    tabEdit.className = 'text-gray-400 hover:text-gray-600 transition pb-3 -mb-3';
     openDeleteModalBtn.classList.add('hidden');
     if (submitBtn) submitBtn.textContent = '메모 붙이기';
   }
 
-  tabNew.addEventListener('click', () => { window.location.href = 'edit.html'; });
-
-  // 폼 제출 (저장/수정)
+  // 폼 제출 (생성 / 수정)
   memoForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -104,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       content: contentInput.value.trim(),
       color: selectedColor,
       author: currentUser ? currentUser.nickname : '익명',
-      requester: currentUser ? currentUser.nickname : null // 수정 요청자 전달
+      requester: currentUser ? currentUser.nickname : null
     };
 
     if (!payload.title || !payload.content) {
@@ -134,11 +126,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 모달 제어
+  // 삭제 모달 열기/닫기
   openDeleteModalBtn.addEventListener('click', () => deleteModal.classList.remove('hidden'));
   closeDeleteModalBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
 
-  // 영구 삭제 처리
+  // 영구 삭제 실행
   confirmDeleteBtn.addEventListener('click', async () => {
     if (!memoId) return;
 
