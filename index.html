@@ -34,7 +34,6 @@
         <span class="w-7 h-7 rounded-full bg-[#82C91E]/20 text-[#5C940D] flex items-center justify-center text-sm font-black">▲</span>
         나무메모
       </a>
-      <!-- 하드코딩된 '관리' 링크 제거: auth.js가 관리자일 때만 자동 주입 -->
       <nav class="flex gap-6 text-sm font-medium">
         <a href="index.html" class="text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1">게시판</a>
         <a href="edit.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">새 메모</a>
@@ -49,13 +48,33 @@
   <main class="wood-board flex-1 p-6 md:p-10 flex flex-col items-center">
     <div class="max-w-6xl w-full">
 
-      <!-- 상단 바: 검색 및 글 카운트 -->
-      <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+      <!-- 상단 바: 좌측(제목/설명/정렬필터) & 우측(검색/새 메모) -->
+      <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 mb-8">
         <div>
           <h1 class="text-2xl font-extrabold text-white drop-shadow-sm">나무 벽 게시판</h1>
-          <p id="memoCountText" class="text-xs text-white/80 mt-1">오늘 등록된 이야기를 불러오는 중입니다...</p>
+          <p id="memoCountText" class="text-xs text-white/80 mt-1 mb-3">오늘 등록된 이야기를 불러오는 중입니다...</p>
+          
+          <!-- 정렬 드롭다운 선택 필터 -->
+          <div class="flex items-center gap-2">
+            <label for="sortSelect" class="text-xs text-white/90 font-medium">정렬 기준:</label>
+            <div class="relative">
+              <select 
+                id="sortSelect" 
+                class="appearance-none bg-white/90 hover:bg-white text-gray-800 text-xs font-semibold pl-3 pr-8 py-1.5 rounded-lg border border-stone-300 shadow-sm outline-none cursor-pointer transition focus:ring-2 focus:ring-[#B04A36]/40"
+              >
+                <option value="recent">최근 작성순</option>
+                <option value="oldest">가장 오래된순</option>
+                <option value="views">조회수순</option>
+                <option value="likes">공감수순</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-600 text-xs">
+                ▼
+              </div>
+            </div>
+          </div>
         </div>
 
+        <!-- 검색창 및 새 메모 버튼 -->
         <div class="flex items-center gap-3 w-full md:w-auto">
           <input 
             type="text" 
