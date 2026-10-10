@@ -71,15 +71,16 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true });
     }
 
-    // 4. 메모 삭제 (DELETE) - 작성자 일치 검증
+    // 4. 메모 삭제 (DELETE)
     if (req.method === 'DELETE') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-      const { requester } = body || {};
+      const { requester, isAdmin } = body || {};
 
       const existingMemo = await memosCollection.findOne({ _id: memoId });
       if (!existingMemo) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
 
-      if (existingMemo.author === '익명' || existingMemo.author !== requester) {
+      // 관리자(isAdmin: true)가 아니면서 본인 글이 아닐 경우만 차단
+      if (!isAdmin && (existingMemo.author === '익명' || existingMemo.author !== requester)) {
         return res.status(403).json({ error: '본인이 작성한 메모만 삭제할 수 있습니다.' });
       }
 

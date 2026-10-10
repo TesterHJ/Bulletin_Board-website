@@ -24,17 +24,25 @@ export default async function handler(req, res) {
         return res.status(409).json({ error: '이미 사용 중인 아이디입니다.' });
       }
 
+      // 아이디가 admin이면 관리자 role 부여
+      const role = username.trim().toLowerCase() === 'admin' ? 'admin' : 'user';
+
       const newUser = {
         username: username.trim(),
         password: password.trim(),
         nickname: nickname.trim(),
+        role,
         createdAt: new Date()
       };
 
       await users.insertOne(newUser);
       return res.status(201).json({ 
         success: true, 
-        user: { username: newUser.username, nickname: newUser.nickname } 
+        user: { 
+          username: newUser.username, 
+          nickname: newUser.nickname,
+          role: newUser.role
+        } 
       });
     }
 
@@ -52,9 +60,16 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: '아이디 또는 비밀번호가 일치하지 않습니다.' });
       }
 
+      // 기존 가입 계정 중 아이디가 admin이면 자동 admin 처리
+      const role = user.role || (user.username.toLowerCase() === 'admin' ? 'admin' : 'user');
+
       return res.status(200).json({ 
         success: true, 
-        user: { username: user.username, nickname: user.nickname } 
+        user: { 
+          username: user.username, 
+          nickname: user.nickname,
+          role
+        } 
       });
     }
 

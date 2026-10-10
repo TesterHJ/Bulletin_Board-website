@@ -8,24 +8,50 @@ function getCurrentUser() {
 function logout() {
   localStorage.removeItem('tree_memo_user');
   alert('로그아웃되었습니다.');
-  window.location.reload();
+  window.location.href = 'index.html';
 }
 
-// 상단 헤더 프로필/로그인 버튼 렌더링
+// 상단 헤더 프로필 및 네비게이션 제어
 function renderHeaderAuth() {
   const profileContainer = document.getElementById('userProfileContainer');
-  if (!profileContainer) return;
-
   const user = getCurrentUser();
 
+  // 1. 관리자 메뉴(링크) 표시 여부 제어
+  const navContainer = document.querySelector('header nav');
+  if (navContainer) {
+    // 기존에 있던 관리 링크가 있다면 제거
+    const existingAdminLink = document.getElementById('navAdminLink');
+    if (existingAdminLink) existingAdminLink.remove();
+
+    // 관리자(role === 'admin')일 때만 관리 메뉴 추가
+    if (user && user.role === 'admin') {
+      const isCurrentAdminPage = window.location.pathname.endsWith('admin.html');
+      const adminLink = document.createElement('a');
+      adminLink.id = 'navAdminLink';
+      adminLink.href = 'admin.html';
+      adminLink.className = isCurrentAdminPage 
+        ? 'text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1'
+        : 'text-[#868E96] hover:text-[#2D3436] transition-colors pb-1';
+      adminLink.textContent = '관리';
+      navContainer.appendChild(adminLink);
+    }
+  }
+
+  // 2. 우측 프로필/로그인 버튼 영역
+  if (!profileContainer) return;
+
   if (user) {
+    const isAdmin = user.role === 'admin';
     profileContainer.innerHTML = `
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-full bg-[#82C91E]/20 text-[#5C940D] flex items-center justify-center font-bold text-xs">
+        <div class="w-8 h-8 rounded-full ${isAdmin ? 'bg-red-100 text-red-600' : 'bg-[#82C91E]/20 text-[#5C940D]'} flex items-center justify-center font-bold text-xs">
           ${user.nickname[0]}
         </div>
         <div class="text-xs text-right leading-tight">
-          <p class="font-semibold text-gray-800">${user.nickname}</p>
+          <p class="font-semibold text-gray-800 flex items-center gap-1 justify-end">
+            ${user.nickname}
+            ${isAdmin ? `<span class="bg-red-500 text-white text-[9px] px-1 py-0.2 rounded font-normal">관리자</span>` : ''}
+          </p>
           <button type="button" onclick="logout()" class="text-red-500 hover:underline text-[10px]">로그아웃</button>
         </div>
       </div>
@@ -40,6 +66,7 @@ function renderHeaderAuth() {
   }
 }
 
+// 팝업 모달 제어
 let currentAuthMode = 'login';
 
 function openAuthModal(mode = 'login') {
@@ -58,7 +85,7 @@ function openAuthModal(mode = 'login') {
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">아이디</label>
-              <input type="text" id="authUsername" class="w-full text-xs p-2 border rounded border-gray-300 focus:outline-none focus:border-[#B04A36]" placeholder="아이디 입력" required />
+              <input type="text" id="authUsername" class="w-full text-xs p-2 border rounded border-gray-300 focus:outline-none focus:border-[#B04A36]" placeholder="아이디 입력 (admin 입력 시 관리자)" required />
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">비밀번호</label>
@@ -136,7 +163,7 @@ function setupModalEvents() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '처리 실패');
 
-      alert(currentAuthMode === 'signup' ? '가입이 완료되었습니다! 로그인되었습니다.' : '로그인되었습니다!');
+      alert(currentAuthMode === 'signup' ? '가입이 완료되었습니다!' : '로그인 성공!');
       localStorage.setItem('tree_memo_user', JSON.stringify(data.user));
       closeAuthModal();
       window.location.reload();
