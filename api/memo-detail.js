@@ -39,7 +39,18 @@ export default async function handler(req, res) {
       return res.status(201).json({ success: true, comment: newComment });
     }
 
-    // 3. 메모 수정 (PUT) - 작성자 일치 검증
+    // 3. 공감(좋아요) 1 증가 (PATCH)
+    if (req.method === 'PATCH') {
+      const result = await memosCollection.findOneAndUpdate(
+        { _id: memoId },
+        { $inc: { likes: 1 } },
+        { returnDocument: 'after' }
+      );
+      if (!result) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
+      return res.status(200).json({ success: true, likes: result.likes });
+    }
+
+    // 4. 메모 수정 (PUT)
     if (req.method === 'PUT') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const { title, content, color, requester } = body || {};
@@ -48,11 +59,9 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: '제목과 내용을 입력해 주세요.' });
       }
 
-      // 기존 메모 조회 및 작성자 대조
       const existingMemo = await memosCollection.findOne({ _id: memoId });
       if (!existingMemo) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
 
-      // 익명 글이거나 본인이 쓴 글이 아니면 거부
       if (existingMemo.author === '익명' || existingMemo.author !== requester) {
         return res.status(403).json({ error: '본인이 작성한 메모만 수정할 수 있습니다.' });
       }
@@ -71,7 +80,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true });
     }
 
-    // 4. 메모 삭제 (DELETE)
+    // 5. 메모 삭제 (DELETE)
     if (req.method === 'DELETE') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const { requester, isAdmin } = body || {};
@@ -79,7 +88,6 @@ export default async function handler(req, res) {
       const existingMemo = await memosCollection.findOne({ _id: memoId });
       if (!existingMemo) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
 
-      // 관리자(isAdmin: true)가 아니면서 본인 글이 아닐 경우만 차단
       if (!isAdmin && (existingMemo.author === '익명' || existingMemo.author !== requester)) {
         return res.status(403).json({ error: '본인이 작성한 메모만 삭제할 수 있습니다.' });
       }
@@ -88,7 +96,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true });
     }
 
-    res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+    res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (error) {
     return res.status(500).json({ error: error.message });

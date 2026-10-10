@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const memoContent = document.getElementById('memoContent');
   const authorAvatar = document.getElementById('authorAvatar');
   const likeCount = document.getElementById('likeCount');
+  const likeBtn = document.getElementById('likeBtn');
   const editLink = document.getElementById('editLink');
 
   const commentTotalCount = document.getElementById('commentTotalCount');
@@ -35,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
 
-      // 본인 글이 아니거나 로그인하지 않은 경우 [수정] 버튼 숨기기
+      // 본인 글이 아니거나 비로그인 시 수정 버튼 숨김
       if (!currentUser || currentUser.nickname !== memo.author) {
         if (editLink) editLink.style.display = 'none';
       } else {
@@ -69,7 +70,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 2. 댓글 렌더링 함수
+  // 2. 공감(좋아요) 버튼 클릭 이벤트
+  let isLiking = false;
+  likeBtn.addEventListener('click', async () => {
+    if (isLiking) return;
+    isLiking = true;
+
+    try {
+      const res = await fetch(`/api/memo-detail?id=${memoId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!res.ok) throw new Error('공감 처리에 실패했습니다.');
+      const data = await res.json();
+
+      if (likeCount) {
+        likeCount.textContent = data.likes;
+      }
+
+      // 하트 누름 애니메이션 효과
+      likeBtn.classList.add('bg-[#FFE3E3]', 'border-[#FFA8A8]');
+      setTimeout(() => {
+        likeBtn.classList.remove('bg-[#FFE3E3]', 'border-[#FFA8A8]');
+      }, 300);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      isLiking = false;
+    }
+  });
+
+  // 3. 댓글 렌더링
   function renderComments(comments) {
     if (commentTotalCount) commentTotalCount.textContent = comments.length;
 
@@ -110,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     commentCharCount.textContent = `${e.target.value.length}/300`;
   });
 
-  // 3. 댓글 등록 API 호출
+  // 4. 댓글 등록
   submitCommentBtn.addEventListener('click', async () => {
     const text = commentInput.value.trim();
     if (!text) {
