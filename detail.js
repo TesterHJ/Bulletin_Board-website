@@ -63,6 +63,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (memoContent) memoContent.textContent = memo.content;
       if (likeCount) likeCount.textContent = memo.likes || 0;
 
+      // 이미 공감한 일반 유저일 경우 버튼에 강조 스타일 유지
+      const likedUsers = memo.likedUsers || [];
+      if (currentUser && currentUser.role !== 'admin' && likedUsers.includes(currentUser.username)) {
+        likeBtn.classList.add('bg-[#FFF5F5]', 'border-[#FFA8A8]', 'text-[#E03131]');
+      }
+
       renderComments(memo.comments || []);
     } catch (err) {
       alert(err.message);
@@ -74,26 +80,44 @@ document.addEventListener('DOMContentLoaded', async () => {
   let isLiking = false;
   likeBtn.addEventListener('click', async () => {
     if (isLiking) return;
+
+    const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+    if (!currentUser) {
+      alert('로그인한 회원만 공감할 수 있습니다.');
+      if (typeof openAuthModal === 'function') {
+        openAuthModal('login');
+      }
+      return;
+    }
+
     isLiking = true;
 
     try {
       const res = await fetch(`/api/memo-detail?id=${memoId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUser.username,
+          isAdmin: currentUser.role === 'admin'
+        })
       });
 
-      if (!res.ok) throw new Error('공감 처리에 실패했습니다.');
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || '공감 처리에 실패했습니다.');
+      }
 
       if (likeCount) {
         likeCount.textContent = data.likes;
       }
 
-      // 하트 누름 애니메이션 효과
-      likeBtn.classList.add('bg-[#FFE3E3]', 'border-[#FFA8A8]');
+      // 애니메이션 효과
+      likeBtn.classList.add('scale-105', 'bg-[#FFE3E3]', 'border-[#FFA8A8]');
       setTimeout(() => {
-        likeBtn.classList.remove('bg-[#FFE3E3]', 'border-[#FFA8A8]');
-      }, 300);
+        likeBtn.classList.remove('scale-105', 'bg-[#FFE3E3]');
+        likeBtn.classList.add('bg-[#FFF5F5]');
+      }, 250);
+
     } catch (err) {
       alert(err.message);
     } finally {

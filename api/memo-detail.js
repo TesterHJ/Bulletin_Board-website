@@ -39,15 +39,43 @@ export default async function handler(req, res) {
       return res.status(201).json({ success: true, comment: newComment });
     }
 
-    // 3. 공감(좋아요) 1 증가 (PATCH)
+    // 3. 공감(좋아요) 처리 (PATCH) - 계정당 1회 제한 (관리자 예외)
     if (req.method === 'PATCH') {
-      const result = await memosCollection.findOneAndUpdate(
-        { _id: memoId },
-        { $inc: { likes: 1 } },
-        { returnDocument: 'after' }
-      );
-      if (!result) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
-      return res.status(200).json({ success: true, likes: result.likes });
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+      const { username, isAdmin } = body || {};
+
+      if (!username) {
+        return res.status(401).json({ error: '로그인 후 공감할 수 있습니다.' });
+      }
+
+      const existingMemo = await memosCollection.findOne({ _id: memoId });
+      if (!existingMemo) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
+
+      // 관리자가 아닌 일반 회원인 경우 중복 체크
+      if (!isAdmin) {
+        const likedUsers = existingMemo.likedUsers || [];
+        if (likedUsers.includes(username)) {
+          return res.status(409).json({ error: '이미 공감한 메모입니다.' });
+        }
+
+        // 일반 유저: likedUsers에 아이디 추가 및 likes +1
+        const updated = await memosCollection.findOneAndUpdate(
+          { _id: memoId },
+          { 
+            $inc: { likes: 1 },$addToSet: { likedUsers: username }
+          },
+          { returnDocument: 'after' }
+        );
+        return res.status(200).json({ success: true, likes: updated.likes });
+      } else {
+        // 관리자: 중복 제한 없이 계속 공감 누적 가능
+        const updated = await memosCollection.findOneAndUpdate(
+          { _id: memoId },
+          { $inc: { likes: 1 } },
+          { returnDocument: 'after' }
+        );
+        return res.status(200).json({ success: true, likes: updated.likes });
+      }
     }
 
     // 4. 메모 수정 (PUT)
