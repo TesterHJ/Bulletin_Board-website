@@ -48,29 +48,42 @@
   <main class="wood-board flex-1 p-6 md:p-10 flex flex-col items-center">
     <div class="max-w-6xl w-full">
 
-      <!-- 상단 바: 좌측(제목/설명/정렬필터) & 우측(검색/새 메모) -->
+      <!-- 상단 바: 좌측(제목/설명/알약형 정렬 칩) & 우측(검색/새 메모) -->
       <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 mb-8">
         <div>
           <h1 class="text-2xl font-extrabold text-white drop-shadow-sm">나무 벽 게시판</h1>
           <p id="memoCountText" class="text-xs text-white/80 mt-1 mb-3">오늘 등록된 이야기를 불러오는 중입니다...</p>
           
-          <!-- 정렬 드롭다운 선택 필터 -->
-          <div class="flex items-center gap-2">
-            <label for="sortSelect" class="text-xs text-white/90 font-medium">정렬 기준:</label>
-            <div class="relative">
-              <select 
-                id="sortSelect" 
-                class="appearance-none bg-white/90 hover:bg-white text-gray-800 text-xs font-semibold pl-3 pr-8 py-1.5 rounded-lg border border-stone-300 shadow-sm outline-none cursor-pointer transition focus:ring-2 focus:ring-[#B04A36]/40"
-              >
-                <option value="recent">최근 작성순</option>
-                <option value="oldest">가장 오래된순</option>
-                <option value="views">조회수순</option>
-                <option value="likes">공감수순</option>
-              </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-600 text-xs">
-                ▼
-              </div>
-            </div>
+          <!-- 1번: 둥근 알약형 세그먼트 정렬 칩 -->
+          <div id="sortPillsContainer" class="inline-flex items-center gap-1.5 bg-black/25 p-1 rounded-full backdrop-blur-sm border border-white/10 shadow-inner">
+            <button 
+              type="button" 
+              data-sort="recent" 
+              class="sort-pill px-3 py-1 rounded-full text-xs font-bold transition duration-150 bg-[#B04A36] text-white shadow-sm"
+            >
+              최신순
+            </button>
+            <button 
+              type="button" 
+              data-sort="oldest" 
+              class="sort-pill px-3 py-1 rounded-full text-xs font-medium transition duration-150 text-white/80 hover:text-white hover:bg-white/10"
+            >
+              오래된순
+            </button>
+            <button 
+              type="button" 
+              data-sort="views" 
+              class="sort-pill px-3 py-1 rounded-full text-xs font-medium transition duration-150 text-white/80 hover:text-white hover:bg-white/10"
+            >
+              조회순
+            </button>
+            <button 
+              type="button" 
+              data-sort="likes" 
+              class="sort-pill px-3 py-1 rounded-full text-xs font-medium transition duration-150 text-white/80 hover:text-white hover:bg-white/10"
+            >
+              공감순
+            </button>
           </div>
         </div>
 

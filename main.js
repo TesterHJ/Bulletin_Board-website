@@ -2,13 +2,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const memoGrid = document.getElementById('memoGrid');
   const memoCountText = document.getElementById('memoCountText');
   const searchInput = document.getElementById('searchInput');
-  const sortSelect = document.getElementById('sortSelect');
+  const sortPills = document.querySelectorAll('.sort-pill');
 
   // 포스트잇 자연스러운 회전 효과용 Tailwind 클래스 배열
   const rotations = ['rotate-1', '-rotate-1', 'rotate-2', '-rotate-2'];
 
   let allMemos = [];
-  let currentSort = 'recent'; // 기본 정렬: 최근 작성순
+  let currentSort = 'recent'; // 기본 정렬: 최신순
 
   // 1. 메모 목록 불러오기 (GET /api/memos)
   async function loadMemos() {
@@ -45,13 +45,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       const likesB = b.likes || 0;
 
       switch (criterion) {
-        case 'recent': // 최근 작성순 (최신순)
+        case 'recent': // 최신순
           return timeB - timeA;
-        case 'oldest': // 가장 오래된순 (과거순)
+        case 'oldest': // 오래된순
           return timeA - timeB;
-        case 'views': // 조회수순
+        case 'views': // 조회순
           return viewsB - viewsA || timeB - timeA;
-        case 'likes': // 공감수순
+        case 'likes': // 공감순
           return likesB - likesA || timeB - timeA;
         default:
           return timeB - timeA;
@@ -156,13 +156,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).join('');
   }
 
-  // 3. 정렬 옵션 변경 이벤트
-  if (sortSelect) {
-    sortSelect.addEventListener('change', (e) => {
-      currentSort = e.target.value;
+  // 3. 알약형 정렬 칩(Pill) 클릭 이벤트 처리
+  sortPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const selectedSort = pill.getAttribute('data-sort');
+      if (currentSort === selectedSort) return;
+
+      currentSort = selectedSort;
+
+      // 칩 스타일 상태 전환 (활성화 / 비활성화)
+      sortPills.forEach(p => {
+        if (p.getAttribute('data-sort') === currentSort) {
+          p.className = 'sort-pill px-3 py-1 rounded-full text-xs font-bold transition duration-150 bg-[#B04A36] text-white shadow-sm';
+        } else {
+          p.className = 'sort-pill px-3 py-1 rounded-full text-xs font-medium transition duration-150 text-white/80 hover:text-white hover:bg-white/10';
+        }
+      });
+
       applyFilterAndSort();
     });
-  }
+  });
 
   // 4. 실시간 검색 필터링 이벤트
   if (searchInput) {
