@@ -1,5 +1,4 @@
-// 나무메모 인증 & 공통 네비게이션 스크립트
-
+// auth.js (프로젝트 루트 위치)
 function getStoredUser() {
   try {
     return JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
@@ -16,30 +15,25 @@ function setStoredUser(user) {
   }
 }
 
-// 상단 네비게이션 바 동기화
 function renderHeaderNav() {
   const user = getStoredUser();
   const navContainer = document.querySelector('header nav');
   
   if (navContainer) {
-    // 1. 현재 접속한 페이지 확인
     const path = window.location.pathname;
     const isIndex = path.endsWith('index.html') || path === '/' || path === '';
     const isEdit = path.includes('edit.html');
     const isAdmin = path.includes('admin.html');
     const isReport = path.includes('reports.html');
 
-    // 기본 링크 스타일 헬퍼
     const activeClass = 'text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1';
     const inactiveClass = 'text-[#868E96] hover:text-[#2D3436] transition-colors pb-1';
 
-    // 2. 기본 네비게이션 재구성 (중복 생성 방지)
     let navHtml = `
       <a href="index.html" class="${isIndex ? activeClass : inactiveClass}">게시판</a>
       <a href="edit.html" class="${isEdit ? activeClass : inactiveClass}">새 메모</a>
     `;
 
-    // 관리자(role === 'admin')일 때만 관리, 신고 링크 추가
     if (user && user.role === 'admin') {
       navHtml += `
         <a href="admin.html" class="${isAdmin ? activeClass : inactiveClass}">관리</a>
@@ -50,7 +44,6 @@ function renderHeaderNav() {
     navContainer.innerHTML = navHtml;
   }
 
-  // 3. 우측 프로필/인증 영역 렌더링
   const profileContainer = document.getElementById('userProfileContainer');
   if (!profileContainer) return;
 
@@ -91,7 +84,6 @@ function renderHeaderNav() {
   }
 }
 
-// 로그아웃
 function handleLogout() {
   if (confirm('로그아웃 하시겠습니까?')) {
     setStoredUser(null);
@@ -100,7 +92,6 @@ function handleLogout() {
   }
 }
 
-// 로그인/회원가입 모달 열기
 function openAuthModal(mode = 'login') {
   let modalEl = document.getElementById('authModal');
   if (!modalEl) {
