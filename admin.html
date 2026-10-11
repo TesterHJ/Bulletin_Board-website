@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>나무메모 - 관리자 센터</title>
+  <title>나무메모 - 게시물 통합 관리</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
   <style>
@@ -18,7 +18,7 @@
 </head>
 <body class="bg-[#F8F9FA] text-[#2D3436] min-h-screen flex flex-col">
 
-  <!-- 헤더 -->
+  <!-- 상단 헤더: 관리 옆에 신고 링크 명시 -->
   <header class="bg-white border-b border-[#E9ECEF] sticky top-0 z-50 px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-8">
       <a href="index.html" class="flex items-center gap-2 text-xl font-bold text-[#2D3436]">
@@ -28,30 +28,34 @@
       <nav class="flex gap-6 text-sm font-medium">
         <a href="index.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">게시판</a>
         <a href="edit.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">새 메모</a>
+        <a href="admin.html" class="text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1">관리</a>
+        <a href="reports.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">신고</a>
       </nav>
     </div>
 
-    <!-- 우측 프로필/인증 컨테이너 -->
+    <!-- 우측 프로필/인증 영역 -->
     <div id="userProfileContainer"></div>
   </header>
 
   <!-- 관리자 대시보드 본문 -->
   <main class="wood-board flex-1 p-6 md:p-10 flex flex-col items-center">
-    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-2xl p-6 md:p-8 border border-stone-200">
+    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-2xl p-8 border border-stone-200">
       
       <div class="flex items-center justify-between pb-6 mb-6 border-b border-gray-100">
         <div>
-          <h1 class="text-xl font-extrabold text-gray-900">게시물 통합 관리</h1>
+          <h1 class="text-2xl font-extrabold text-gray-900">게시물 통합 관리</h1>
           <p class="text-xs text-gray-500 mt-1">부적절한 게시물을 검토하고 강제 삭제할 수 있습니다.</p>
         </div>
-        <span class="bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full">관리자 모드</span>
+        <span class="text-xs font-bold text-[#E03131] bg-[#FFF5F5] border border-[#FFA8A8] px-3 py-1 rounded-full">
+          관리자 모드
+        </span>
       </div>
 
-      <!-- 게시물 관리 테이블 -->
+      <!-- 게시물 테이블 목록 -->
       <div class="overflow-x-auto">
-        <table class="w-full text-xs text-left">
-          <thead class="text-gray-500 bg-gray-50 uppercase text-[11px] border-b">
-            <tr>
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="bg-gray-50/70 text-gray-500 font-bold border-b border-gray-100">
               <th class="py-3 px-4">식별 번호</th>
               <th class="py-3 px-4">제목</th>
               <th class="py-3 px-4">작성자</th>
@@ -61,7 +65,9 @@
           </thead>
           <tbody id="adminMemoList" class="divide-y divide-gray-100">
             <tr>
-              <td colspan="5" class="py-8 text-center text-gray-400">게시물을 불러오는 중...</td>
+              <td colspan="5" class="text-center py-12 text-gray-400">
+                게시물을 불러오는 중입니다...
+              </td>
             </tr>
           </tbody>
         </table>
@@ -71,67 +77,6 @@
   </main>
 
   <script src="auth.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      // 1. 비관리자 접근 즉시 차단
-      const user = getCurrentUser();
-      if (!user || user.role !== 'admin') {
-        alert('관리자만 접근할 수 있는 페이지입니다.');
-        window.location.href = 'index.html';
-        return;
-      }
-
-      // 2. 전체 게시물 로드
-      const adminMemoList = document.getElementById('adminMemoList');
-      try {
-        const res = await fetch('/api/memos');
-        if (!res.ok) throw new Error('목록 조회 실패');
-        const memos = await res.json();
-
-        if (memos.length === 0) {
-          adminMemoList.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-400">등록된 게시물이 없습니다.</td></tr>`;
-          return;
-        }
-
-        adminMemoList.innerHTML = memos.map(memo => `
-          <tr class="hover:bg-gray-50/80 transition">
-            <td class="py-3 px-4 font-mono text-gray-400">#${memo._id.slice(-4)}</td>
-            <td class="py-3 px-4 font-semibold text-gray-800">
-              <a href="detail.html?id=${memo._id}" class="hover:underline">${memo.title}</a>
-            </td>
-            <td class="py-3 px-4 text-gray-600">${memo.author || '익명'}</td>
-            <td class="py-3 px-4 text-gray-400">${new Date(memo.createdAt).toLocaleDateString('ko-KR')}</td>
-            <td class="py-3 px-4 text-center">
-              <button onclick="adminDeleteMemo('${memo._id}', '${memo.title}')" class="bg-red-50 text-red-600 hover:bg-red-100 font-bold px-2.5 py-1 rounded transition text-[11px]">
-                강제 삭제
-              </button>
-            </td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        adminMemoList.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-500">${err.message}</td></tr>`;
-      }
-    });
-
-    // 관리자 강제 삭제 기능
-    async function adminDeleteMemo(id, title) {
-      if (!confirm(`'${title}' 글을 강제로 삭제하시겠습니까?`)) return;
-
-      const user = getCurrentUser();
-      try {
-        const res = await fetch(`/api/memo-detail?id=${id}`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ requester: user.nickname, isAdmin: true })
-        });
-
-        if (!res.ok) throw new Error('삭제 처리에 실패했습니다.');
-        alert('삭제되었습니다.');
-        window.location.reload();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-  </script>
+  <script src="admin.js"></script>
 </body>
 </html>
