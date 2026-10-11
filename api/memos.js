@@ -21,10 +21,10 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: '제목과 내용을 입력해 주세요.' });
       }
 
-      // 관리자 전용 색상 검증
+      // 관리자 전용 색상 검증: 관리자가 아니면 기본 노란색으로 변경
       let memoColor = color || '#FEF9C3';
-      if (memoColor === '#FED7AA' && !isAdmin) {
-        memoColor = '#FEF9C3'; // 일반 회원은 기본 노란색으로 강제 변경
+      if (memoColor === '#2D3436' && !isAdmin) {
+        memoColor = '#FEF9C3';
       }
 
       const newMemo = {

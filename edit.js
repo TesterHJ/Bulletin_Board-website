@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const memoForm = document.getElementById('memoForm');
   const titleInput = document.getElementById('titleInput');
   const contentInput = document.getElementById('contentInput');
-  const colorRadios = document.querySelectorAll('input[name="memoColor"]');
   const openDeleteModalBtn = document.getElementById('openDeleteModalBtn');
   const submitBtn = memoForm.querySelector('button[type="submit"]');
 
@@ -17,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const previewCard = document.getElementById('previewCard');
   const previewTitle = document.getElementById('previewTitle');
   const previewContent = document.getElementById('previewContent');
+  const previewFooter = document.getElementById('previewFooter');
 
   const deleteModal = document.getElementById('deleteModal');
   const closeDeleteModalBtn = document.getElementById('closeDeleteModalBtn');
@@ -25,13 +25,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
 
-  // 관리자 전용 색상 노출 제어
+  // 관리자 전용 색상 버튼 표시 여부
   if (currentUser && currentUser.role === 'admin' && adminColorOption) {
     adminColorOption.classList.remove('hidden');
     adminColorOption.classList.add('flex');
   }
 
-  // 실시간 미리보기
+  // 실시간 미리보기 카드 색상/글자색 동기화 함수
+  function updatePreviewColor(color) {
+    previewCard.style.backgroundColor = color;
+    if (color === '#2D3436') {
+      previewTitle.className = 'font-bold text-base text-white mb-2 leading-snug break-words';
+      previewContent.className = 'text-xs text-gray-200 leading-relaxed break-words whitespace-pre-line';
+      previewFooter.className = 'pt-4 mt-6 border-t border-white/10 flex items-center justify-between text-[11px] text-gray-300';
+    } else {
+      previewTitle.className = 'font-bold text-base text-gray-900 mb-2 leading-snug break-words';
+      previewContent.className = 'text-xs text-gray-700 leading-relaxed break-words whitespace-pre-line';
+      previewFooter.className = 'pt-4 mt-6 border-t border-black/5 flex items-center justify-between text-[11px] text-gray-500';
+    }
+  }
+
+  // 실시간 타이핑 미리보기
   titleInput.addEventListener('input', (e) => {
     const val = e.target.value;
     previewTitle.textContent = val || '제목을 입력해 주세요';
@@ -44,10 +58,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     contentCounter.textContent = `${val.length} / 2,000`;
   });
 
-  // 모든 색상 라디오 변경 이벤트
+  // 색상 라디오 변경 이벤트
   document.querySelectorAll('input[name="memoColor"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
-      previewCard.style.backgroundColor = e.target.value;
+      updatePreviewColor(e.target.value);
     });
   });
 
@@ -61,7 +75,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!res.ok) throw new Error('메모를 불러올 수 없습니다.');
       const memo = await res.json();
       
-      // 본인 작성 검증 (관리자는 다른 사람 글도 편집 허용 가능)
       const isAuthor = currentUser && currentUser.nickname === memo.author;
       const isAdmin = currentUser && currentUser.role === 'admin';
 
@@ -74,8 +87,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       titleInput.value = memo.title;
       contentInput.value = memo.content;
 
-      // 수정 글의 색상이 관리자 색상인 경우 표시
-      if (memo.color === '#FED7AA' && adminColorOption) {
+      // 수정할 글이 다크 블랙 색상인 경우 관리자 색상 옵션 노출
+      if (memo.color === '#2D3436' && adminColorOption) {
         adminColorOption.classList.remove('hidden');
         adminColorOption.classList.add('flex');
       }
@@ -83,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const targetRadio = document.querySelector(`input[name="memoColor"][value="${memo.color}"]`);
       if (targetRadio) {
         targetRadio.checked = true;
-        previewCard.style.backgroundColor = memo.color;
+        updatePreviewColor(memo.color);
       }
 
       previewTitle.textContent = memo.title;
@@ -107,8 +120,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const selectedColor = document.querySelector('input[name="memoColor"]:checked')?.value || '#FEF9C3';
 
-    // 일반 유저가 관리자 색상을 요청할 경우 차단
-    if (selectedColor === '#FED7AA' && (!currentUser || currentUser.role !== 'admin')) {
+    // 일반 유저가 다크 블랙 색상을 사용할 경우 방어
+    if (selectedColor === '#2D3436' && (!currentUser || currentUser.role !== 'admin')) {
       alert('관리자 전용 색상입니다.');
       return;
     }
@@ -149,11 +162,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 삭제 모달 열기/닫기
+  // 모달 제어
   openDeleteModalBtn.addEventListener('click', () => deleteModal.classList.remove('hidden'));
   closeDeleteModalBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
 
-  // 삭제 실행
+  // 삭제 처리
   confirmDeleteBtn.addEventListener('click', async () => {
     if (!memoId) return;
 

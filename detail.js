@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const likeCount = document.getElementById('likeCount');
   const likeBtn = document.getElementById('likeBtn');
   const editLink = document.getElementById('editLink');
+  const memoArticleCard = document.getElementById('memoArticleCard');
 
   const commentTotalCount = document.getElementById('commentTotalCount');
   const commentList = document.getElementById('commentList');
@@ -27,7 +28,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   editLink.href = `edit.html?id=${memoId}`;
 
-  // 1. 메모 상세 정보 불러오기
   async function loadMemoDetail() {
     try {
       const res = await fetch(`/api/memo-detail?id=${memoId}`);
@@ -36,11 +36,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
 
-      // 본인 글이 아니거나 비로그인 시 수정 버튼 숨김
-      if (!currentUser || currentUser.nickname !== memo.author) {
+      const isAuthor = currentUser && currentUser.nickname === memo.author;
+      const isAdmin = currentUser && currentUser.role === 'admin';
+
+      if (!isAuthor && !isAdmin) {
         if (editLink) editLink.style.display = 'none';
       } else {
         if (editLink) editLink.style.display = 'inline-block';
+      }
+
+      // 블랙/다크 메모지인 경우 상세 페이지 카드 스타일 대응
+      if (memo.color === '#2D3436' && memoArticleCard) {
+        memoArticleCard.style.backgroundColor = '#2D3436';
+        memoArticleCard.classList.remove('bg-[#FCFBF7]');
+        memoTitle.className = 'text-2xl md:text-3xl font-extrabold text-white mb-4 tracking-tight leading-snug';
+        memoContent.className = 'space-y-4 text-[15px] leading-relaxed text-gray-200 whitespace-pre-line';
+        memoAuthor.className = 'text-sm font-bold text-gray-200';
       }
 
       if (memoNumber) memoNumber.textContent = `메모 #${memo._id.slice(-4)}`;
@@ -63,7 +74,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (memoContent) memoContent.textContent = memo.content;
       if (likeCount) likeCount.textContent = memo.likes || 0;
 
-      // 이미 공감한 일반 유저일 경우 버튼에 강조 스타일 유지
       const likedUsers = memo.likedUsers || [];
       if (currentUser && currentUser.role !== 'admin' && likedUsers.includes(currentUser.username)) {
         likeBtn.classList.add('bg-[#FFF5F5]', 'border-[#FFA8A8]', 'text-[#E03131]');
@@ -76,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 2. 공감(좋아요) 버튼 클릭 이벤트
+  // 공감 버튼 클릭 핸들러
   let isLiking = false;
   likeBtn.addEventListener('click', async () => {
     if (isLiking) return;
@@ -84,9 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
     if (!currentUser) {
       alert('로그인한 회원만 공감할 수 있습니다.');
-      if (typeof openAuthModal === 'function') {
-        openAuthModal('login');
-      }
+      if (typeof openAuthModal === 'function') openAuthModal('login');
       return;
     }
 
@@ -103,15 +111,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || '공감 처리에 실패했습니다.');
-      }
+      if (!res.ok) throw new Error(data.error || '공감 처리에 실패했습니다.');
 
-      if (likeCount) {
-        likeCount.textContent = data.likes;
-      }
+      if (likeCount) likeCount.textContent = data.likes;
 
-      // 애니메이션 효과
       likeBtn.classList.add('scale-105', 'bg-[#FFE3E3]', 'border-[#FFA8A8]');
       setTimeout(() => {
         likeBtn.classList.remove('scale-105', 'bg-[#FFE3E3]');
@@ -125,7 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 3. 댓글 렌더링
   function renderComments(comments) {
     if (commentTotalCount) commentTotalCount.textContent = comments.length;
 
@@ -166,7 +168,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     commentCharCount.textContent = `${e.target.value.length}/300`;
   });
 
-  // 4. 댓글 등록
   submitCommentBtn.addEventListener('click', async () => {
     const text = commentInput.value.trim();
     if (!text) {

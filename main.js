@@ -4,13 +4,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const searchInput = document.getElementById('searchInput');
   const sortPills = document.querySelectorAll('.sort-pill');
 
-  // 포스트잇 자연스러운 회전 효과용 Tailwind 클래스 배열
   const rotations = ['rotate-1', '-rotate-1', 'rotate-2', '-rotate-2'];
 
   let allMemos = [];
-  let currentSort = 'recent'; // 기본 정렬: 최신순
+  let currentSort = 'recent';
 
-  // 1. 메모 목록 불러오기 (GET /api/memos)
   async function loadMemos() {
     try {
       const res = await fetch('/api/memos');
@@ -28,13 +26,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 오늘 날짜 자정(00:00:00) 기준 타임스탬프 계산
   function getStartOfToday() {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   }
 
-  // 정렬 알고리즘 함수
   function sortMemos(list, criterion) {
     return [...list].sort((a, b) => {
       const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -45,13 +41,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       const likesB = b.likes || 0;
 
       switch (criterion) {
-        case 'recent': // 최신순
+        case 'recent':
           return timeB - timeA;
-        case 'oldest': // 오래된순
+        case 'oldest':
           return timeA - timeB;
-        case 'views': // 조회순
+        case 'views':
           return viewsB - viewsA || timeB - timeA;
-        case 'likes': // 공감순
+        case 'likes':
           return likesB - likesA || timeB - timeA;
         default:
           return timeB - timeA;
@@ -59,13 +55,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 필터링 및 정렬 통합 처리 함수
   function applyFilterAndSort() {
     const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
     let result = allMemos;
 
-    // 검색어 필터링
     if (keyword) {
       result = result.filter(memo => 
         memo.title.toLowerCase().includes(keyword) ||
@@ -74,12 +68,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       );
     }
 
-    // 정렬 적용
     result = sortMemos(result, currentSort);
     renderMemos(result);
   }
 
-  // 2. 메모 카드 그리드 렌더링 함수
   function renderMemos(memos) {
     if (memoCountText) {
       memoCountText.textContent = `오늘 ${allMemos.length}개의 이야기가 새로 붙었어요`;
@@ -94,7 +86,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // --- 당일 최다 공감(likes) 메모 선정 ---
     const startOfToday = getStartOfToday();
     const todayMemosWithLikes = allMemos.filter(memo => {
       const created = memo.createdAt ? new Date(memo.createdAt).getTime() : 0;
@@ -123,29 +114,42 @@ document.addEventListener('DOMContentLoaded', async () => {
       const viewsCount = memo.views || 0;
       const isTopMemo = topMemoId && memo._id === topMemoId;
 
+      // 블랙/다크 색상일 때 글자색 및 테두리 처리
+      const isDark = memo.color === '#2D3436';
+      const titleColor = isDark ? 'text-white' : 'text-gray-900';
+      const contentColor = isDark ? 'text-gray-200' : 'text-gray-700';
+      const authorColor = isDark ? 'text-gray-300' : 'text-gray-700';
+      const metaColor = isDark ? 'text-gray-400' : 'text-stone-500';
+      const dividerColor = isDark ? 'border-white/10' : 'border-black/5';
+
       return `
         <article 
           onclick="location.href='detail.html?id=${memo._id}'" 
           style="background-color: ${memo.color || '#FEF9C3'};" 
-          class="rounded shadow-lg p-5 relative transform ${rot} hover:rotate-0 hover:scale-[1.02] transition duration-200 cursor-pointer flex flex-col justify-between min-h-[220px]"
+          class="rounded shadow-xl p-5 relative transform ${rot} hover:rotate-0 hover:scale-[1.02] transition duration-200 cursor-pointer flex flex-col justify-between min-h-[220px] ${isDark ? 'border border-gray-600/40' : ''}"
         >
           <div class="pin absolute -top-1.5 left-1/2 -translate-x-1/2"></div>
           <div>
+            ${isDark ? `
+              <span class="inline-flex items-center gap-1 bg-red-600/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mb-2 shadow-sm">
+                👑 관리자 메모
+              </span>
+            ` : ''}
             ${isTopMemo ? `
               <span class="inline-flex items-center gap-1 bg-[#D9480F] text-white text-[10px] font-bold px-2 py-0.5 rounded-full mb-2 shadow-sm">
                 <span>★</span> 오늘의 인기 메모
               </span>
             ` : ''}
-            <h3 class="font-bold text-lg text-gray-900 mb-2 leading-snug break-words">
+            <h3 class="font-bold text-lg ${titleColor} mb-2 leading-snug break-words">
               ${escapeHtml(memo.title)}
             </h3>
-            <p class="text-xs text-gray-700 leading-relaxed line-clamp-4 break-words">
+            <p class="text-xs ${contentColor} leading-relaxed line-clamp-4 break-words">
               ${escapeHtml(memo.content)}
             </p>
           </div>
-          <div class="flex items-center justify-between text-[11px] text-gray-500 pt-4 mt-auto border-t border-black/5">
-            <span class="font-semibold text-gray-700">${escapeHtml(memo.author || '익명')}</span>
-            <div class="flex items-center gap-2 text-stone-500 text-[10px]">
+          <div class="flex items-center justify-between text-[11px] pt-4 mt-auto border-t ${dividerColor}">
+            <span class="font-semibold ${authorColor}">${escapeHtml(memo.author || '익명')}</span>
+            <div class="flex items-center gap-2 ${metaColor} text-[10px]">
               <span title="조회수">조회 ${viewsCount}</span>
               <span title="공감수">♡ ${likeCount}</span>
               <span title="댓글수">댓글 ${commentCount}</span>
@@ -156,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).join('');
   }
 
-  // 3. 알약형 정렬 칩(Pill) 클릭 이벤트 처리
+  // 알약 정렬 칩 클릭 이벤트
   sortPills.forEach(pill => {
     pill.addEventListener('click', () => {
       const selectedSort = pill.getAttribute('data-sort');
@@ -164,7 +168,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       currentSort = selectedSort;
 
-      // 칩 스타일 상태 전환 (활성화 / 비활성화)
       sortPills.forEach(p => {
         if (p.getAttribute('data-sort') === currentSort) {
           p.className = 'sort-pill px-3 py-1 rounded-full text-xs font-bold transition duration-150 bg-[#B04A36] text-white shadow-sm';
@@ -177,14 +180,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 4. 실시간 검색 필터링 이벤트
   if (searchInput) {
-    searchInput.addEventListener('input', () => {
-      applyFilterAndSort();
-    });
+    searchInput.addEventListener('input', applyFilterAndSort);
   }
 
-  // XSS 방지용 이스케이프 헬퍼
   function escapeHtml(text) {
     if (!text) return '';
     return text
@@ -195,6 +194,5 @@ document.addEventListener('DOMContentLoaded', async () => {
       .replace(/'/g, '&#039;');
   }
 
-  // 초기 실행
   loadMemos();
 });
