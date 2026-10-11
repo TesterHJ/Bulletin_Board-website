@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const editLink = document.getElementById('editLink');
   const memoArticleCard = document.getElementById('memoArticleCard');
 
+  const shareBtn = document.getElementById('shareBtn');
+  const reportBtn = document.getElementById('reportBtn');
+
   const commentTotalCount = document.getElementById('commentTotalCount');
   const commentList = document.getElementById('commentList');
   const commentInput = document.getElementById('commentInput');
@@ -28,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   editLink.href = `edit.html?id=${memoId}`;
 
+  // 1. 메모 상세 로드
   async function loadMemoDetail() {
     try {
       const res = await fetch(`/api/memo-detail?id=${memoId}`);
@@ -36,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
 
-      // 본인 글 판별 (닉네임 일치 or ownerUsername 일치 or 관리자)
+      // 본인 글 판별: 닉네임 일치 OR ownerUsername 일치 OR 관리자
       const isAuthor = currentUser && (
         currentUser.nickname === memo.author ||
         (memo.ownerUsername && currentUser.username === memo.ownerUsername)
@@ -49,12 +53,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (editLink) editLink.style.display = 'inline-block';
       }
 
-      // 카드 배경색을 메모의 고유 색상으로 적용
+      // 카드 배경색을 메모 고유 색상으로 적용
       const memoColor = memo.color || '#FEF9C3';
       if (memoArticleCard) {
         memoArticleCard.style.backgroundColor = memoColor;
         memoArticleCard.classList.remove('bg-[#FCFBF7]');
 
+        // 검은색(#2D3436) 다크 모드 텍스트 대응
         if (memoColor === '#2D3436') {
           memoTitle.className = 'text-2xl md:text-3xl font-extrabold text-white mb-4 tracking-tight leading-snug';
           memoContent.className = 'space-y-4 text-[15px] leading-relaxed text-gray-200 whitespace-pre-line';
@@ -100,7 +105,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 공감 버튼 핸들러
+  // 2. 공유 버튼 핸들러
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.href);
+      alert('메모 링크가 복사되었습니다!');
+    });
+  }
+
+  // 3. 신고 버튼 핸들러
+  if (reportBtn) {
+    reportBtn.addEventListener('click', async () => {
+      const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+      if (!currentUser) {
+        alert('로그인한 회원만 신고할 수 있습니다.');
+        if (typeof openAuthModal === 'function') openAuthModal('login');
+        return;
+      }
+
+      const reason = prompt('신고 사유를 작성해 주세요 (예: 욕설, 비방, 음란물, 도배 등):');
+      if (reason === null) return; // 취소 클릭
+
+      try {
+        const res = await fetch('/api/memo-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            memoId: memoId,
+            username: currentUser.username,
+            reason: reason.trim() || '부적절한 내용'
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || '신고 접수에 실패했습니다.');
+        }
+
+        alert('신고가 성공적으로 접수되었습니다. 관리자 확인 후 처리됩니다.');
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  }
+
+  // 4. 공감 버튼 클릭 핸들러 (1회 제한, 관리자 무제한)
   let isLiking = false;
   likeBtn.addEventListener('click', async () => {
     if (isLiking) return;
@@ -142,6 +191,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // 5. 댓글 렌더링
   function renderComments(comments) {
     if (commentTotalCount) commentTotalCount.textContent = comments.length;
 
@@ -182,6 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     commentCharCount.textContent = `${e.target.value.length}/300`;
   });
 
+  // 6. 댓글 등록
   submitCommentBtn.addEventListener('click', async () => {
     const text = commentInput.value.trim();
     if (!text) {

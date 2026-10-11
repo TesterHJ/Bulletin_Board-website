@@ -55,10 +55,11 @@
         <!-- 좌측 메모 본문 카드 -->
         <article id="memoArticleCard" class="lg:col-span-8 bg-[#FCFBF7] rounded-xl shadow-xl p-8 md:p-10 flex flex-col justify-between border border-[#EBE8DF] min-h-[580px] transition-colors">
           <div>
+            <!-- 상단 공유 및 신고 버튼 -->
             <div class="flex items-center justify-end mb-4">
               <div class="flex items-center gap-3 text-xs text-gray-400">
-                <button type="button" onclick="navigator.clipboard.writeText(window.location.href); alert('링크가 복사되었습니다!');" class="hover:text-gray-700 transition">공유</button>
-                <button type="button" onclick="alert('신고가 접수되었습니다.');" class="hover:text-gray-700 transition">신고</button>
+                <button type="button" id="shareBtn" class="hover:text-gray-700 transition">공유</button>
+                <button type="button" id="reportBtn" class="hover:text-gray-700 transition">신고</button>
               </div>
             </div>
 
@@ -81,7 +82,7 @@
             </div>
           </div>
 
-          <!-- 하단 버튼 영역: 호버 시 더 뚜렷한 진한 회색(hover:bg-stone-300 hover:border-stone-400) 적용 -->
+          <!-- 하단 버튼 영역 -->
           <div class="flex items-center justify-between pt-8 mt-8 border-t border-black/10">
             <!-- 공감 버튼 -->
             <button id="likeBtn" type="button" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-stone-200 bg-white text-[#E03131] hover:bg-stone-300 hover:border-stone-400 transition-colors text-xs font-semibold shadow-sm active:scale-95">
