@@ -10,6 +10,10 @@
     body {
       font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     }
+    .wood-board {
+      background: radial-gradient(circle at 50% 30%, #a27b5c 0%, #7d5a3c 60%, #563d27 100%);
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.4);
+    }
   </style>
 </head>
 <body class="bg-[#F8F9FA] text-[#2D3436] min-h-screen flex flex-col">
@@ -21,31 +25,35 @@
         <span class="w-7 h-7 rounded-full bg-[#82C91E]/20 text-[#5C940D] flex items-center justify-center text-sm font-black">▲</span>
         나무메모
       </a>
-      <nav class="flex gap-6 text-sm font-medium">
-        <a href="index.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">게시판</a>
-        <a href="edit.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">새 메모</a>
-        <a href="admin.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">관리</a>
-        <a href="reports.html" class="text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1">신고</a>
-      </nav>
+      <nav class="flex gap-6 text-sm font-medium"></nav>
     </div>
     <div id="userProfileContainer"></div>
   </header>
 
-  <!-- 본문 컨텐츠 -->
-  <main class="flex-1 p-6 md:p-10 max-w-6xl w-full mx-auto">
-    <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-      <div>
-        <h1 class="text-2xl font-extrabold text-gray-900">신고 접수 내역</h1>
-        <p id="reportSummaryText" class="text-xs text-gray-500 mt-1">사용자들이 신고한 메모 목록을 확인하고 관리합니다.</p>
+  <!-- 관리자 대시보드와 통일된 나무 바탕 메인 영역 -->
+  <main class="wood-board flex-1 p-6 md:p-10 flex flex-col items-center">
+    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-2xl p-8 border border-stone-200">
+      
+      <div class="flex items-center justify-between pb-6 mb-6 border-b border-gray-100">
+        <div>
+          <h1 class="text-2xl font-extrabold text-gray-900">신고 접수 내역</h1>
+          <p id="reportSummaryText" class="text-xs text-gray-500 mt-1">사용자들이 신고한 메모 목록을 확인하고 관리합니다.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-[#E03131] bg-[#FFF5F5] border border-[#FFA8A8] px-3 py-1 rounded-full">
+            신고 모니터링
+          </span>
+          <button onclick="location.reload()" class="px-3 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-lg text-xs font-semibold transition shadow-sm">
+            새로고침
+          </button>
+        </div>
       </div>
-      <button onclick="location.reload()" class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-semibold hover:bg-gray-50 transition shadow-sm">
-        새로고침
-      </button>
-    </div>
 
-    <!-- 신고 메모 리스트 테이블/카드 래퍼 -->
-    <div id="reportListContainer" class="space-y-4">
-      <div class="text-center py-20 text-gray-400 text-xs">신고 내역을 불러오는 중입니다...</div>
+      <!-- 신고 메모 리스트 테이블/카드 래퍼 -->
+      <div id="reportListContainer" class="space-y-4">
+        <div class="text-center py-16 text-gray-400 text-xs">신고 내역을 불러오는 중입니다...</div>
+      </div>
+
     </div>
   </main>
 

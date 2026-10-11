@@ -1,176 +1,223 @@
-// 현재 로그인된 유저 가져오기
-function getCurrentUser() {
-  const data = localStorage.getItem('tree_memo_user');
-  return data ? JSON.parse(data) : null;
+// 나무메모 인증 & 공통 네비게이션 스크립트
+
+function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+  } catch {
+    return null;
+  }
 }
 
-// 로그아웃
-function logout() {
-  localStorage.removeItem('tree_memo_user');
-  alert('로그아웃되었습니다.');
-  window.location.href = 'index.html';
+function setStoredUser(user) {
+  if (user) {
+    localStorage.setItem('tree_memo_user', JSON.stringify(user));
+  } else {
+    localStorage.removeItem('tree_memo_user');
+  }
 }
 
-// 상단 헤더 프로필 및 네비게이션 제어
-function renderHeaderAuth() {
-  const profileContainer = document.getElementById('userProfileContainer');
-  const user = getCurrentUser();
-
-  // 1. 관리자 메뉴(링크) 표시 여부 제어
+// 상단 네비게이션 바 동기화
+function renderHeaderNav() {
+  const user = getStoredUser();
   const navContainer = document.querySelector('header nav');
+  
   if (navContainer) {
-    // 기존에 있던 관리 링크가 있다면 제거
-    const existingAdminLink = document.getElementById('navAdminLink');
-    if (existingAdminLink) existingAdminLink.remove();
+    // 1. 현재 접속한 페이지 확인
+    const path = window.location.pathname;
+    const isIndex = path.endsWith('index.html') || path === '/' || path === '';
+    const isEdit = path.includes('edit.html');
+    const isAdmin = path.includes('admin.html');
+    const isReport = path.includes('reports.html');
 
-    // 관리자(role === 'admin')일 때만 관리 메뉴 추가
+    // 기본 링크 스타일 헬퍼
+    const activeClass = 'text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1';
+    const inactiveClass = 'text-[#868E96] hover:text-[#2D3436] transition-colors pb-1';
+
+    // 2. 기본 네비게이션 재구성 (중복 생성 방지)
+    let navHtml = `
+      <a href="index.html" class="${isIndex ? activeClass : inactiveClass}">게시판</a>
+      <a href="edit.html" class="${isEdit ? activeClass : inactiveClass}">새 메모</a>
+    `;
+
+    // 관리자(role === 'admin')일 때만 관리, 신고 링크 추가
     if (user && user.role === 'admin') {
-      const isCurrentAdminPage = window.location.pathname.endsWith('admin.html');
-      const adminLink = document.createElement('a');
-      adminLink.id = 'navAdminLink';
-      adminLink.href = 'admin.html';
-      adminLink.className = isCurrentAdminPage 
-        ? 'text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1'
-        : 'text-[#868E96] hover:text-[#2D3436] transition-colors pb-1';
-      adminLink.textContent = '관리';
-      navContainer.appendChild(adminLink);
+      navHtml += `
+        <a href="admin.html" class="${isAdmin ? activeClass : inactiveClass}">관리</a>
+        <a href="reports.html" class="${isReport ? activeClass : inactiveClass}">신고</a>
+      `;
     }
+
+    navContainer.innerHTML = navHtml;
   }
 
-  // 2. 우측 프로필/로그인 버튼 영역
+  // 3. 우측 프로필/인증 영역 렌더링
+  const profileContainer = document.getElementById('userProfileContainer');
   if (!profileContainer) return;
 
   if (user) {
     const isAdmin = user.role === 'admin';
     profileContainer.innerHTML = `
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-full ${isAdmin ? 'bg-red-100 text-red-600' : 'bg-[#82C91E]/20 text-[#5C940D]'} flex items-center justify-center font-bold text-xs">
-          ${user.nickname[0]}
+        <div class="w-7 h-7 rounded-full ${isAdmin ? 'bg-red-500 text-white' : 'bg-[#D9480F]/20 text-[#D9480F]'} flex items-center justify-center text-xs font-bold shadow-sm">
+          ${user.nickname ? user.nickname[0] : 'U'}
         </div>
-        <div class="text-xs text-right leading-tight">
-          <p class="font-semibold text-gray-800 flex items-center gap-1 justify-end">
-            ${user.nickname}
-            ${isAdmin ? `<span class="bg-red-500 text-white text-[9px] px-1 py-0.2 rounded font-normal">관리자</span>` : ''}
-          </p>
-          <button type="button" onclick="logout()" class="text-red-500 hover:underline text-[10px]">로그아웃</button>
+        <div class="flex flex-col text-right">
+          <div class="flex items-center gap-1 justify-end">
+            <span class="text-xs font-bold text-gray-800 leading-none">${escapeHtmlAuth(user.nickname || user.username)}</span>
+            ${isAdmin ? `<span class="text-[9px] bg-red-600 text-white px-1 py-0.5 rounded font-black leading-none">관리자</span>` : ''}
+          </div>
+          <button type="button" id="logoutBtn" class="text-[10px] text-gray-400 hover:text-gray-600 transition text-right leading-tight mt-0.5">
+            로그아웃
+          </button>
         </div>
       </div>
     `;
+
+    document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
   } else {
     profileContainer.innerHTML = `
-      <div class="flex items-center gap-2">
-        <button type="button" onclick="openAuthModal('login')" class="text-xs font-semibold text-gray-600 hover:text-gray-900 border border-gray-300 px-2.5 py-1 rounded">로그인</button>
-        <button type="button" onclick="openAuthModal('signup')" class="text-xs font-semibold text-white bg-[#B04A36] hover:bg-[#973C2A] px-2.5 py-1 rounded">회원가입</button>
+      <div class="flex items-center gap-2 text-xs">
+        <button type="button" id="openLoginBtn" class="text-gray-600 hover:text-gray-900 font-semibold px-2.5 py-1.5 transition">
+          로그인
+        </button>
+        <button type="button" id="openSignupBtn" class="bg-[#B04A36] hover:bg-[#973C2A] text-white font-semibold px-3 py-1.5 rounded-lg shadow-sm transition">
+          회원가입
+        </button>
       </div>
     `;
+
+    document.getElementById('openLoginBtn')?.addEventListener('click', () => openAuthModal('login'));
+    document.getElementById('openSignupBtn')?.addEventListener('click', () => openAuthModal('signup'));
   }
 }
 
-// 팝업 모달 제어
-let currentAuthMode = 'login';
+// 로그아웃
+function handleLogout() {
+  if (confirm('로그아웃 하시겠습니까?')) {
+    setStoredUser(null);
+    alert('로그아웃되었습니다.');
+    window.location.href = 'index.html';
+  }
+}
 
+// 로그인/회원가입 모달 열기
 function openAuthModal(mode = 'login') {
-  let modal = document.getElementById('authModal');
-  if (!modal) {
-    const modalHtml = `
-      <div id="authModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 relative">
-          <button type="button" onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
-          <h2 id="authModalTitle" class="text-lg font-bold text-gray-900 mb-4">로그인</h2>
-          
-          <form id="authModalForm" class="space-y-3">
-            <div id="nicknameField" class="hidden">
-              <label class="block text-xs font-semibold text-gray-600 mb-1">닉네임</label>
-              <input type="text" id="authNickname" class="w-full text-xs p-2 border rounded border-gray-300 focus:outline-none focus:border-[#B04A36]" placeholder="사용할 닉네임" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 mb-1">아이디</label>
-              <input type="text" id="authUsername" class="w-full text-xs p-2 border rounded border-gray-300 focus:outline-none focus:border-[#B04A36]" placeholder="아이디 입력 (admin 입력 시 관리자)" required />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 mb-1">비밀번호</label>
-              <input type="password" id="authPassword" class="w-full text-xs p-2 border rounded border-gray-300 focus:outline-none focus:border-[#B04A36]" placeholder="비밀번호 입력" required />
-            </div>
-            <button type="submit" id="authSubmitBtn" class="w-full bg-[#B04A36] hover:bg-[#973C2A] text-white text-xs font-bold py-2 rounded transition mt-2">로그인</button>
-          </form>
-
-          <div class="mt-4 text-center">
-            <button type="button" id="authToggleBtn" class="text-xs text-gray-500 hover:underline">회원가입 하러가기</button>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    modal = document.getElementById('authModal');
-    setupModalEvents();
+  let modalEl = document.getElementById('authModal');
+  if (!modalEl) {
+    modalEl = createAuthModalDOM();
+    document.body.appendChild(modalEl);
   }
 
-  setModalMode(mode);
-  modal.classList.remove('hidden');
+  const titleEl = document.getElementById('authModalTitle');
+  const nicknameGroup = document.getElementById('authNicknameGroup');
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const switchText = document.getElementById('authSwitchText');
+  const switchBtn = document.getElementById('authSwitchBtn');
+
+  if (mode === 'login') {
+    modalEl.dataset.mode = 'login';
+    titleEl.textContent = '로그인';
+    nicknameGroup.classList.add('hidden');
+    submitBtn.textContent = '로그인하기';
+    switchText.textContent = '아직 계정이 없으신가요?';
+    switchBtn.textContent = '회원가입';
+  } else {
+    modalEl.dataset.mode = 'signup';
+    titleEl.textContent = '새싹 회원가입';
+    nicknameGroup.classList.remove('hidden');
+    submitBtn.textContent = '가입하기';
+    switchText.textContent = '이미 계정이 있으신가요?';
+    switchBtn.textContent = '로그인';
+  }
+
+  modalEl.classList.remove('hidden');
 }
 
 function closeAuthModal() {
-  const modal = document.getElementById('authModal');
-  if (modal) modal.classList.add('hidden');
+  const modalEl = document.getElementById('authModal');
+  if (modalEl) modalEl.classList.add('hidden');
 }
 
-function setModalMode(mode) {
-  currentAuthMode = mode;
-  const title = document.getElementById('authModalTitle');
-  const nicknameField = document.getElementById('nicknameField');
-  const submitBtn = document.getElementById('authSubmitBtn');
-  const toggleBtn = document.getElementById('authToggleBtn');
+function createAuthModalDOM() {
+  const div = document.createElement('div');
+  div.id = 'authModal';
+  div.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden';
+  div.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative border border-gray-100">
+      <button type="button" id="closeAuthModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">✕</button>
+      <h3 id="authModalTitle" class="text-xl font-extrabold text-gray-900 mb-5 text-center">로그인</h3>
+      
+      <form id="authForm" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">아이디</label>
+          <input type="text" id="authUsername" required placeholder="아이디를 입력해 주세요" class="w-full text-xs p-2.5 border rounded-lg border-gray-300 focus:outline-none focus:border-[#B04A36]">
+        </div>
+        <div id="authNicknameGroup" class="hidden">
+          <label class="block text-xs font-bold text-gray-700 mb-1">닉네임</label>
+          <input type="text" id="authNickname" placeholder="사용할 닉네임" class="w-full text-xs p-2.5 border rounded-lg border-gray-300 focus:outline-none focus:border-[#B04A36]">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">비밀번호</label>
+          <input type="password" id="authPassword" required placeholder="비밀번호를 입력해 주세요" class="w-full text-xs p-2.5 border rounded-lg border-gray-300 focus:outline-none focus:border-[#B04A36]">
+        </div>
+        <button type="submit" id="authSubmitBtn" class="w-full py-2.5 bg-[#B04A36] hover:bg-[#973C2A] text-white text-xs font-bold rounded-lg shadow transition mt-2">
+          로그인하기
+        </button>
+      </form>
 
-  if (mode === 'signup') {
-    title.textContent = '회원가입';
-    nicknameField.classList.remove('hidden');
-    submitBtn.textContent = '가입하기';
-    toggleBtn.textContent = '이미 계정이 있으신가요? 로그인';
-  } else {
-    title.textContent = '로그인';
-    nicknameField.classList.add('hidden');
-    submitBtn.textContent = '로그인';
-    toggleBtn.textContent = '계정이 없으신가요? 회원가입';
-  }
-}
+      <div class="mt-4 pt-4 border-t border-gray-100 text-center text-xs text-gray-500">
+        <span id="authSwitchText">아직 계정이 없으신가요?</span>
+        <button type="button" id="authSwitchBtn" class="ml-1 text-[#B04A36] font-bold hover:underline">회원가입</button>
+      </div>
+    </div>
+  `;
 
-function setupModalEvents() {
-  const form = document.getElementById('authModalForm');
-  const toggleBtn = document.getElementById('authToggleBtn');
-
-  toggleBtn.addEventListener('click', () => {
-    setModalMode(currentAuthMode === 'login' ? 'signup' : 'login');
+  div.querySelector('#closeAuthModalBtn').addEventListener('click', closeAuthModal);
+  div.querySelector('#authSwitchBtn').addEventListener('click', () => {
+    const curMode = div.dataset.mode;
+    openAuthModal(curMode === 'login' ? 'signup' : 'login');
   });
 
-  form.addEventListener('submit', async (e) => {
+  div.querySelector('#authForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const mode = div.dataset.mode;
     const username = document.getElementById('authUsername').value.trim();
     const password = document.getElementById('authPassword').value.trim();
     const nickname = document.getElementById('authNickname').value.trim();
 
     try {
-      const res = await fetch('/api/auth', {
+      const endpoint = mode === 'signup' ? '/api/auth?action=signup' : '/api/auth?action=login';
+      const body = mode === 'signup' ? { username, password, nickname } : { username, password };
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: currentAuthMode,
-          username,
-          password,
-          nickname: currentAuthMode === 'signup' ? nickname : undefined
-        })
+        body: JSON.stringify(body)
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '처리 실패');
+      if (!res.ok) throw new Error(data.error || '인증 처리에 실패했습니다.');
 
-      alert(currentAuthMode === 'signup' ? '가입이 완료되었습니다!' : '로그인 성공!');
-      localStorage.setItem('tree_memo_user', JSON.stringify(data.user));
+      setStoredUser(data.user);
+      alert(mode === 'signup' ? '회원가입이 완료되었습니다!' : '로그인되었습니다!');
       closeAuthModal();
       window.location.reload();
     } catch (err) {
       alert(err.message);
     }
   });
+
+  return div;
 }
 
-document.addEventListener('DOMContentLoaded', renderHeaderAuth);
+function escapeHtmlAuth(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+document.addEventListener('DOMContentLoaded', renderHeaderNav);

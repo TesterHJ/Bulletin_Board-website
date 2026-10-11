@@ -18,19 +18,14 @@
 </head>
 <body class="bg-[#F8F9FA] text-[#2D3436] min-h-screen flex flex-col">
 
-  <!-- 상단 헤더: 관리 옆에 신고 링크 명시 -->
+  <!-- 상단 헤더: nav는 auth.js에서 동적으로 단일 렌더링 -->
   <header class="bg-white border-b border-[#E9ECEF] sticky top-0 z-50 px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-8">
       <a href="index.html" class="flex items-center gap-2 text-xl font-bold text-[#2D3436]">
         <span class="w-7 h-7 rounded-full bg-[#82C91E]/20 text-[#5C940D] flex items-center justify-center text-sm font-black">▲</span>
         나무메모
       </a>
-      <nav class="flex gap-6 text-sm font-medium">
-        <a href="index.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">게시판</a>
-        <a href="edit.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">새 메모</a>
-        <a href="admin.html" class="text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1">관리</a>
-        <a href="reports.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">신고</a>
-      </nav>
+      <nav class="flex gap-6 text-sm font-medium"></nav>
     </div>
 
     <!-- 우측 프로필/인증 영역 -->
