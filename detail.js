@@ -45,13 +45,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (editLink) editLink.style.display = 'inline-block';
       }
 
-      // 블랙/다크 메모지인 경우 상세 페이지 카드 스타일 대응
-      if (memo.color === '#2D3436' && memoArticleCard) {
-        memoArticleCard.style.backgroundColor = '#2D3436';
+      // 카드 배경색을 메모의 고유 색상으로 적용
+      const memoColor = memo.color || '#FEF9C3';
+      if (memoArticleCard) {
+        memoArticleCard.style.backgroundColor = memoColor;
         memoArticleCard.classList.remove('bg-[#FCFBF7]');
-        memoTitle.className = 'text-2xl md:text-3xl font-extrabold text-white mb-4 tracking-tight leading-snug';
-        memoContent.className = 'space-y-4 text-[15px] leading-relaxed text-gray-200 whitespace-pre-line';
-        memoAuthor.className = 'text-sm font-bold text-gray-200';
+
+        // 검은색(다크 모드)일 경우 텍스트 색상 대응
+        if (memoColor === '#2D3436') {
+          memoTitle.className = 'text-2xl md:text-3xl font-extrabold text-white mb-4 tracking-tight leading-snug';
+          memoContent.className = 'space-y-4 text-[15px] leading-relaxed text-gray-200 whitespace-pre-line';
+          memoAuthor.className = 'text-sm font-bold text-gray-200';
+          if (memoDate) memoDate.className = 'text-xs text-gray-400';
+        } else {
+          // 일반 색상(노랑, 연두, 하늘, 분홍 등)일 경우 가독성 좋은 어두운 폰트 적용
+          memoTitle.className = 'text-2xl md:text-3xl font-extrabold text-[#212529] mb-4 tracking-tight leading-snug';
+          memoContent.className = 'space-y-4 text-[15px] leading-relaxed text-[#343A40] whitespace-pre-line';
+          memoAuthor.className = 'text-sm font-bold text-gray-800';
+          if (memoDate) memoDate.className = 'text-xs text-gray-500';
+        }
       }
 
       if (memoNumber) memoNumber.textContent = `메모 #${memo._id.slice(-4)}`;
