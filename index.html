@@ -48,7 +48,7 @@
   <main class="wood-board flex-1 p-6 md:p-10 flex flex-col items-center">
     <div class="max-w-6xl w-full flex flex-col min-h-[calc(100vh-140px)] justify-between">
 
-      <!-- 상단 컨트롤 영역 -->
+      <!-- 상단 컨트롤 및 메모 그리드 -->
       <div>
         <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 mb-8">
           <div>
@@ -113,40 +113,29 @@
         </div>
       </div>
 
-      <!-- 하단 페이지네이션 컨트롤 (2줄 = 최대 8개 초과 시 활성화) -->
-      <nav id="paginationContainer" class="flex items-center justify-center gap-2 mt-10 mb-4 select-none hidden" aria-label="메모 페이지 이동">
-        <button 
-          id="btnFirstPage" 
-          type="button" 
-          class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/90 hover:bg-white text-gray-800 disabled:opacity-40 disabled:hover:bg-white/90 disabled:cursor-not-allowed shadow transition active:scale-95"
-        >
-          « 처음으로
-        </button>
+      <!-- 하단 숫자 페이지네이션 (1번 스타일) -->
+      <nav id="paginationContainer" class="flex items-center justify-center gap-2 mt-10 mb-4 select-none hidden" aria-label="메모 페이지 번호">
+        <!-- 이전 페이지 버튼 -->
         <button 
           id="btnPrevPage" 
           type="button" 
-          class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/90 hover:bg-white text-gray-800 disabled:opacity-40 disabled:hover:bg-white/90 disabled:cursor-not-allowed shadow transition active:scale-95"
+          class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-white/90 hover:bg-white text-gray-800 disabled:opacity-30 disabled:hover:bg-white/90 disabled:cursor-not-allowed shadow transition active:scale-95"
+          title="이전 페이지"
         >
-          ‹ 이전 페이지
+          ‹
         </button>
-        
-        <span id="pageInfoText" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-black/40 text-white backdrop-blur-sm border border-white/10 shadow-inner">
-          1 / 1
-        </span>
 
+        <!-- 동적 숫자 버튼 컨테이너 -->
+        <div id="pageNumberButtons" class="flex items-center gap-1.5"></div>
+
+        <!-- 다음 페이지 버튼 -->
         <button 
           id="btnNextPage" 
           type="button" 
-          class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/90 hover:bg-white text-gray-800 disabled:opacity-40 disabled:hover:bg-white/90 disabled:cursor-not-allowed shadow transition active:scale-95"
+          class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-white/90 hover:bg-white text-gray-800 disabled:opacity-30 disabled:hover:bg-white/90 disabled:cursor-not-allowed shadow transition active:scale-95"
+          title="다음 페이지"
         >
-          다음 페이지 ›
-        </button>
-        <button 
-          id="btnLastPage" 
-          type="button" 
-          class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/90 hover:bg-white text-gray-800 disabled:opacity-40 disabled:hover:bg-white/90 disabled:cursor-not-allowed shadow transition active:scale-95"
-        >
-          마지막으로 »
+          ›
         </button>
       </nav>
 
