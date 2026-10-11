@@ -114,7 +114,7 @@ function openAuthModal(mode = 'login') {
     switchBtn.textContent = '회원가입';
   } else {
     modalEl.dataset.mode = 'signup';
-    titleEl.textContent = '새싹 회원가입';
+    titleEl.textContent = '회원가입';
     nicknameGroup.classList.remove('hidden');
     submitBtn.textContent = '가입하기';
     switchText.textContent = '이미 계정이 있으신가요?';
