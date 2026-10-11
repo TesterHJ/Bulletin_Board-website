@@ -13,8 +13,15 @@
       font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     }
     .wood-board {
-      background: radial-gradient(circle at 50% 30%, #a27b5c 0%, #7d5a3c 60%, #563d27 100%);
-      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.4);
+      background-color: #7d5a3c;
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.4)),
+        url('img/memosite bg.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
     }
     .pin {
       width: 14px;
@@ -27,29 +34,26 @@
 </head>
 <body class="bg-[#F8F9FA] text-[#2D3436] min-h-screen flex flex-col">
 
-  <!-- 1. 상단 네비게이션 헤더 -->
+  <!-- 상단 네비게이션 헤더 -->
   <header class="bg-white border-b border-[#E9ECEF] sticky top-0 z-50 px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-8">
       <a href="index.html" class="flex items-center gap-2 text-xl font-bold text-[#2D3436]">
         <span class="w-7 h-7 rounded-full bg-[#82C91E]/20 text-[#5C940D] flex items-center justify-center text-sm font-black">▲</span>
         나무메모
       </a>
-      <nav class="flex gap-6 text-sm font-medium">
-        <a href="index.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">게시판</a>
-        <a href="edit.html" class="text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1">새 메모</a>
-      </nav>
+      <nav class="flex gap-6 text-sm font-medium"></nav>
     </div>
 
     <!-- 우측 프로필/인증 영역 -->
     <div id="userProfileContainer"></div>
   </header>
 
-  <!-- 2. 메인 작업 영역 -->
+  <!-- 메인 작업 영역 -->
   <main class="wood-board flex-1 p-6 md:p-10 flex flex-col items-center justify-center">
     <div class="max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-stone-200 my-auto">
 
       <div class="grid grid-cols-1 md:grid-cols-12 gap-8 p-6 md:p-8 items-start">
-        <!-- 좌측: 입력 폼 (7컬럼) -->
+        <!-- 좌측: 입력 폼 -->
         <form id="memoForm" class="md:col-span-7 space-y-5">
           <h2 id="pageTitle" class="text-xl font-extrabold text-[#B04A36]">새 메모 붙이기</h2>
 
@@ -104,7 +108,6 @@
           <div>
             <label class="block text-xs font-bold text-gray-700 mb-2">메모지 색상</label>
             <div class="flex items-center gap-3 flex-wrap">
-              <!-- 기본 일반 색상 -->
               <label class="cursor-pointer" title="클래식 옐로우">
                 <input type="radio" name="memoColor" value="#FEF9C3" checked class="hidden peer" />
                 <span class="w-7 h-7 rounded-full bg-[#FEF9C3] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition"></span>
@@ -122,7 +125,7 @@
                 <span class="w-7 h-7 rounded-full bg-[#FCE7F3] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition"></span>
               </label>
 
-              <!-- 관리자 전용 색상 (다크 차콜 블랙 #2D3436) -->
+              <!-- 관리자 전용 색상 -->
               <div id="adminColorOption" class="hidden items-center gap-1.5 pl-2 border-l border-gray-200">
                 <label class="cursor-pointer relative" title="관리자 전용 다크 차콜">
                   <input type="radio" name="memoColor" value="#2D3436" class="hidden peer" />
@@ -155,7 +158,7 @@
           </div>
         </form>
 
-        <!-- 우측: 실시간 미리보기 (5컬럼) -->
+        <!-- 우측: 실시간 미리보기 -->
         <div class="md:col-span-5 flex flex-col">
           <span class="text-xs font-bold text-gray-500 mb-3 block">미리보기</span>
           <div 

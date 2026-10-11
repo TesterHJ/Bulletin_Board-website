@@ -13,8 +13,15 @@
       font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     }
     .wood-board {
-      background: radial-gradient(circle at 50% 30%, #a27b5c 0%, #7d5a3c 60%, #563d27 100%);
-      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.4);
+      background-color: #7d5a3c;
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.4)),
+        url('img/memosite bg.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
     }
     .pin {
       width: 14px;
@@ -34,10 +41,7 @@
         <span class="w-7 h-7 rounded-full bg-[#82C91E]/20 text-[#5C940D] flex items-center justify-center text-sm font-black">▲</span>
         나무메모
       </a>
-      <nav class="flex gap-6 text-sm font-medium">
-        <a href="index.html" class="text-[#2D3436] font-bold border-b-2 border-[#D9480F] pb-1">게시판</a>
-        <a href="edit.html" class="text-[#868E96] hover:text-[#2D3436] transition-colors pb-1">새 메모</a>
-      </nav>
+      <nav class="flex gap-6 text-sm font-medium"></nav>
     </div>
 
     <!-- 우측 프로필/인증 영역 -->
@@ -116,7 +120,6 @@
       <!-- 하단 알약형(Pill) 페이지네이션 트랙 -->
       <nav id="paginationContainer" class="flex items-center justify-center mt-10 mb-4 select-none hidden" aria-label="메모 페이지 이동">
         <div class="inline-flex items-center gap-1 bg-black/25 p-1 rounded-full backdrop-blur-sm border border-white/10 shadow-inner">
-          <!-- 이전 페이지 버튼 -->
           <button 
             id="btnPrevPage" 
             type="button" 
@@ -125,11 +128,7 @@
           >
             ‹
           </button>
-
-          <!-- 페이지 번호 캡슐 버튼 컨테이너 -->
           <div id="pageNumberButtons" class="inline-flex items-center gap-1"></div>
-
-          <!-- 다음 페이지 버튼 -->
           <button 
             id="btnNextPage" 
             type="button" 

@@ -11,14 +11,21 @@
       font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     }
     .wood-board {
-      background: radial-gradient(circle at 50% 30%, #a27b5c 0%, #7d5a3c 60%, #563d27 100%);
-      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.4);
+      background-color: #7d5a3c;
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.4)),
+        url('img/memosite bg.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
     }
   </style>
 </head>
 <body class="bg-[#F8F9FA] text-[#2D3436] min-h-screen flex flex-col">
 
-  <!-- 상단 헤더: nav는 auth.js에서 동적으로 단일 렌더링 -->
+  <!-- 상단 헤더 -->
   <header class="bg-white border-b border-[#E9ECEF] sticky top-0 z-50 px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-8">
       <a href="index.html" class="flex items-center gap-2 text-xl font-bold text-[#2D3436]">
