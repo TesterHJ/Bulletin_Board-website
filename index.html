@@ -56,8 +56,13 @@
       <div>
         <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 mb-8">
           <div>
-            <h1 class="text-2xl font-extrabold text-white drop-shadow-sm">나무 벽 게시판</h1>
-            <p id="memoCountText" class="text-xs text-white/80 mt-1 mb-3">오늘 등록된 이야기를 불러오는 중입니다...</p>
+            <!-- 타이틀 및 카운트 텍스트 크기 확대 -->
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white drop-shadow-md tracking-tight">
+              나무 벽 게시판
+            </h1>
+            <p id="memoCountText" class="text-sm md:text-base font-medium text-white/90 mt-1.5 mb-4 drop-shadow-sm">
+              오늘 등록된 이야기를 불러오는 중입니다...
+            </p>
             
             <!-- 정렬 세그먼트 칩 -->
             <div id="sortPillsContainer" class="inline-flex items-center gap-1.5 bg-black/25 p-1 rounded-full backdrop-blur-sm border border-white/10 shadow-inner">
@@ -98,11 +103,11 @@
               type="text" 
               id="searchInput" 
               placeholder="제목, 내용, 작성자 검색..." 
-              class="bg-white/90 focus:bg-white text-xs px-4 py-2 rounded-full border border-stone-200 outline-none w-full md:w-64 shadow-sm transition placeholder:text-stone-400"
+              class="bg-white/90 focus:bg-white text-xs px-4 py-2.5 rounded-full border border-stone-200 outline-none w-full md:w-64 shadow-sm transition placeholder:text-stone-400"
             />
             <a 
               href="edit.html" 
-              class="whitespace-nowrap bg-[#B04A36] hover:bg-[#973C2A] text-white text-xs font-bold px-4 py-2 rounded-full shadow transition"
+              class="whitespace-nowrap bg-[#B04A36] hover:bg-[#973C2A] text-white text-xs font-bold px-4 py-2.5 rounded-full shadow transition"
             >
               + 새 메모
             </a>
