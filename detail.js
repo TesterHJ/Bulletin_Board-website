@@ -126,10 +126,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (likeCount) likeCount.textContent = data.likes;
 
-      // 클릭 시 일시적인 살짝 어두운 효과 후 원복
-      likeBtn.classList.add('scale-105', 'bg-gray-200');
+      // 클릭 시 일시적인 진한 피드백 후 원래 흰색 유지
+      likeBtn.classList.add('scale-105', 'bg-stone-300');
       setTimeout(() => {
-        likeBtn.classList.remove('scale-105', 'bg-gray-200');
+        likeBtn.classList.remove('scale-105', 'bg-stone-300');
         likeBtn.classList.add('bg-white');
       }, 250);
 
