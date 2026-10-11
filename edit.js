@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const titleCounter = document.getElementById('titleCounter');
   const contentCounter = document.getElementById('contentCounter');
   const pageTitle = document.getElementById('pageTitle');
+  const adminColorOption = document.getElementById('adminColorOption');
 
   const previewCard = document.getElementById('previewCard');
   const previewTitle = document.getElementById('previewTitle');
@@ -22,7 +23,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
   const deleteModalDesc = document.getElementById('deleteModalDesc');
 
-  // 실시간 미리보기 동기화
+  const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+
+  // 관리자 전용 색상 노출 제어
+  if (currentUser && currentUser.role === 'admin' && adminColorOption) {
+    adminColorOption.classList.remove('hidden');
+    adminColorOption.classList.add('flex');
+  }
+
+  // 실시간 미리보기
   titleInput.addEventListener('input', (e) => {
     const val = e.target.value;
     previewTitle.textContent = val || '제목을 입력해 주세요';
@@ -35,7 +44,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     contentCounter.textContent = `${val.length} / 2,000`;
   });
 
-  colorRadios.forEach(radio => {
+  // 모든 색상 라디오 변경 이벤트
+  document.querySelectorAll('input[name="memoColor"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
       previewCard.style.backgroundColor = e.target.value;
     });
@@ -50,11 +60,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await fetch(`/api/memo-detail?id=${memoId}`);
       if (!res.ok) throw new Error('메모를 불러올 수 없습니다.');
       const memo = await res.json();
-
-      const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
       
-      // 본인 작성 메모 여부 검증
-      if (!currentUser || currentUser.nickname !== memo.author) {
+      // 본인 작성 검증 (관리자는 다른 사람 글도 편집 허용 가능)
+      const isAuthor = currentUser && currentUser.nickname === memo.author;
+      const isAdmin = currentUser && currentUser.role === 'admin';
+
+      if (!isAuthor && !isAdmin) {
         alert('본인이 작성한 메모만 수정할 수 있습니다.');
         window.location.href = `detail.html?id=${memoId}`;
         return;
@@ -62,6 +73,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       titleInput.value = memo.title;
       contentInput.value = memo.content;
+
+      // 수정 글의 색상이 관리자 색상인 경우 표시
+      if (memo.color === '#FED7AA' && adminColorOption) {
+        adminColorOption.classList.remove('hidden');
+        adminColorOption.classList.add('flex');
+      }
 
       const targetRadio = document.querySelector(`input[name="memoColor"][value="${memo.color}"]`);
       if (targetRadio) {
@@ -84,19 +101,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (submitBtn) submitBtn.textContent = '메모 붙이기';
   }
 
-  // 폼 제출 (생성 / 수정)
+  // 폼 제출
   memoForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const selectedColor = document.querySelector('input[name="memoColor"]:checked')?.value || '#FFFFFF';
-    const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+    const selectedColor = document.querySelector('input[name="memoColor"]:checked')?.value || '#FEF9C3';
+
+    // 일반 유저가 관리자 색상을 요청할 경우 차단
+    if (selectedColor === '#FED7AA' && (!currentUser || currentUser.role !== 'admin')) {
+      alert('관리자 전용 색상입니다.');
+      return;
+    }
 
     const payload = {
       title: titleInput.value.trim(),
       content: contentInput.value.trim(),
       color: selectedColor,
       author: currentUser ? currentUser.nickname : '익명',
-      requester: currentUser ? currentUser.nickname : null
+      requester: currentUser ? currentUser.nickname : null,
+      isAdmin: currentUser?.role === 'admin'
     };
 
     if (!payload.title || !payload.content) {
@@ -130,18 +153,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   openDeleteModalBtn.addEventListener('click', () => deleteModal.classList.remove('hidden'));
   closeDeleteModalBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
 
-  // 영구 삭제 실행
+  // 삭제 실행
   confirmDeleteBtn.addEventListener('click', async () => {
     if (!memoId) return;
-
-    const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
 
     try {
       const res = await fetch(`/api/memo-detail?id=${memoId}`, { 
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          requester: currentUser ? currentUser.nickname : null
+          requester: currentUser ? currentUser.nickname : null,
+          isAdmin: currentUser?.role === 'admin'
         })
       });
 

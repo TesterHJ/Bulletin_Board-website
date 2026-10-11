@@ -6,33 +6,37 @@ export default async function handler(req, res) {
     const db = client.db('namumemo');
     const memosCollection = db.collection('memos');
 
-    // 1. 메모 목록 조회 (GET)
+    // GET: 전체 메모 목록
     if (req.method === 'GET') {
-      const memos = await memosCollection
-        .find({})
-        .sort({ createdAt: -1 }) // 최신순 정렬
-        .toArray();
-
+      const memos = await memosCollection.find({}).sort({ createdAt: -1 }).toArray();
       return res.status(200).json(memos);
     }
 
-    // 2. 새 메모 등록 (POST)
+    // POST: 신규 메모 생성
     if (req.method === 'POST') {
-      const { title, content, color, author } = req.body;
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+      const { title, content, color, author, isAdmin } = body || {};
 
-      if (!title || !content) {
-        return res.status(400).json({ error: '제목과 내용을 모두 입력해 주세요.' });
+      if (!title?.trim() || !content?.trim()) {
+        return res.status(400).json({ error: '제목과 내용을 입력해 주세요.' });
+      }
+
+      // 관리자 전용 색상 검증
+      let memoColor = color || '#FEF9C3';
+      if (memoColor === '#FED7AA' && !isAdmin) {
+        memoColor = '#FEF9C3'; // 일반 회원은 기본 노란색으로 강제 변경
       }
 
       const newMemo = {
         title: title.trim(),
         content: content.trim(),
-        color: color || '#FEF9C3', // 기본값: 노랑
+        color: memoColor,
         author: author || '익명',
-        createdAt: new Date(),
         views: 0,
         likes: 0,
-        comments: []
+        likedUsers: [],
+        comments: [],
+        createdAt: new Date()
       };
 
       const result = await memosCollection.insertOne(newMemo);
@@ -42,7 +46,6 @@ export default async function handler(req, res) {
     res.setHeader('Allow', ['GET', 'POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (error) {
-    console.error('API Error:', error);
-    return res.status(500).json({ error: '서버 내부 오류가 발생했습니다.' });
+    return res.status(500).json({ error: error.message });
   }
 }
