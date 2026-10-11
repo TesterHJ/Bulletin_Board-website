@@ -34,6 +34,12 @@ export default async function handler(req, res) {
       const targetMemo = await memosCollection.findOne({ _id: new ObjectId(memoId) });
       if (!targetMemo) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
 
+      // 본인 작성 메모 신고 방지 검증 (익명 글일 때 ownerUsername 비교 포함)
+      const isOwner = (targetMemo.ownerUsername && targetMemo.ownerUsername === username);
+      if (isOwner) {
+        return res.status(400).json({ error: '본인이 작성한 메모는 신고할 수 없습니다.' });
+      }
+
       // 동일 유저 중복 신고 방지
       const existingReports = targetMemo.reports || [];
       if (existingReports.some(r => r.reporter === username)) {

@@ -29,6 +29,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const commentCharCount = document.getElementById('commentCharCount');
   const submitCommentBtn = document.getElementById('submitCommentBtn');
 
+  let currentLoadedMemo = null; // 메모 정보 캐싱
+
   editLink.href = `edit.html?id=${memoId}`;
 
   // 1. 메모 상세 로드
@@ -37,6 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await fetch(`/api/memo-detail?id=${memoId}`);
       if (!res.ok) throw new Error('메모를 불러올 수 없습니다.');
       const memo = await res.json();
+      currentLoadedMemo = memo;
 
       const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
 
@@ -113,7 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 3. 신고 버튼 핸들러
+  // 3. 신고 버튼 핸들러 (본인 작성 메모 차단)
   if (reportBtn) {
     reportBtn.addEventListener('click', async () => {
       const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
@@ -121,6 +124,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert('로그인한 회원만 신고할 수 있습니다.');
         if (typeof openAuthModal === 'function') openAuthModal('login');
         return;
+      }
+
+      // 본인 작성 여부 검증
+      if (currentLoadedMemo) {
+        const isOwner = (currentLoadedMemo.ownerUsername && currentLoadedMemo.ownerUsername === currentUser.username) ||
+                        (currentLoadedMemo.author !== '익명' && currentLoadedMemo.author === currentUser.nickname);
+        if (isOwner) {
+          alert('본인이 작성한 메모는 신고할 수 없습니다.');
+          return;
+        }
       }
 
       const reason = prompt('신고 사유를 작성해 주세요 (예: 욕설, 비방, 음란물, 도배 등):');
@@ -149,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 4. 공감 버튼 클릭 핸들러 (1회 제한, 관리자 무제한)
+  // 4. 공감 버튼 핸들러 (1회 제한, 관리자 무제한)
   let isLiking = false;
   likeBtn.addEventListener('click', async () => {
     if (isLiking) return;
