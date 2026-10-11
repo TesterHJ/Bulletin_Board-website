@@ -81,23 +81,26 @@
             </div>
           </div>
 
-          <!-- 하단 버튼 영역 ('마음' -> '공감' 변경) -->
-          <div class="flex items-center justify-between pt-8 mt-8 border-t border-[#E9ECEF]">
-            <button id="likeBtn" type="button" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#FFD8D8] text-[#E03131] hover:bg-[#FFF5F5] transition text-xs font-semibold shadow-sm active:scale-95">
+          <!-- 하단 버튼 영역: 흰색 배경 + 마우스 오버 시 회색(hover:bg-gray-100) 적용 -->
+          <div class="flex items-center justify-between pt-8 mt-8 border-t border-black/10">
+            <!-- 공감 버튼 (글자색 빨강 계열 유지) -->
+            <button id="likeBtn" type="button" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#FFD8D8] bg-white text-[#E03131] hover:bg-gray-100 transition text-xs font-semibold shadow-sm active:scale-95">
               <span>♡</span> 공감 <span id="likeCount">0</span>
             </button>
             <div class="flex items-center gap-2">
-              <a id="editLink" href="#" class="px-3.5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition text-xs font-semibold shadow-sm">
+              <!-- 수정 버튼 (글자색 짙은 회색 유지) -->
+              <a id="editLink" href="#" class="px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition text-xs font-semibold shadow-sm">
                 수정
               </a>
-              <a href="index.html" class="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition text-xs font-semibold shadow-sm">
+              <!-- 목록으로 버튼 (글자색 짙은 회색 유지) -->
+              <a href="index.html" class="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition text-xs font-semibold shadow-sm">
                 <span>≡</span> 목록으로
               </a>
             </div>
           </div>
         </article>
 
-        <!-- 우측 댓글 -->
+        <!-- 우측 댓글 패널 -->
         <aside class="lg:col-span-4 bg-white rounded-xl shadow-xl p-5 border border-gray-100 flex flex-col min-h-[580px]">
           <div class="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
             <h2 class="font-bold text-gray-900 text-sm">댓글 <span id="commentTotalCount" class="text-[#D9480F]">0</span></h2>
