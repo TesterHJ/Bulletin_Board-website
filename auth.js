@@ -1,4 +1,5 @@
-// auth.js (프로젝트 루트 위치)
+// 나무메모 인증 & 공통 네비게이션 스크립트
+
 function getStoredUser() {
   try {
     return JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
@@ -15,6 +16,7 @@ function setStoredUser(user) {
   }
 }
 
+// 상단 네비게이션 바 동기화
 function renderHeaderNav() {
   const user = getStoredUser();
   const navContainer = document.querySelector('header nav');
@@ -44,6 +46,7 @@ function renderHeaderNav() {
     navContainer.innerHTML = navHtml;
   }
 
+  // 우측 프로필/인증 영역 렌더링
   const profileContainer = document.getElementById('userProfileContainer');
   if (!profileContainer) return;
 
@@ -70,7 +73,7 @@ function renderHeaderNav() {
   } else {
     profileContainer.innerHTML = `
       <div class="flex items-center gap-2 text-xs">
-        <button type="button" id="openLoginBtn" class="text-gray-600 hover:text-gray-900 font-semibold px-2.5 py-1.5 transition">
+        <button type="button" id="openLoginBtn" class="border border-gray-700 text-gray-800 hover:bg-gray-100 font-bold px-3 py-1.5 rounded-lg transition shadow-sm">
           로그인
         </button>
         <button type="button" id="openSignupBtn" class="bg-[#B04A36] hover:bg-[#973C2A] text-white font-semibold px-3 py-1.5 rounded-lg shadow-sm transition">
@@ -84,6 +87,7 @@ function renderHeaderNav() {
   }
 }
 
+// 로그아웃
 function handleLogout() {
   if (confirm('로그아웃 하시겠습니까?')) {
     setStoredUser(null);
@@ -92,6 +96,7 @@ function handleLogout() {
   }
 }
 
+// 로그인/회원가입 모달 열기
 function openAuthModal(mode = 'login') {
   let modalEl = document.getElementById('authModal');
   if (!modalEl) {
