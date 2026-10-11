@@ -11,14 +11,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnNextPage = document.getElementById('btnNextPage');
 
   const rotations = ['rotate-1', '-rotate-1', 'rotate-2', '-rotate-2'];
-  const MEMOS_PER_PAGE = 8; // 1줄에 4개 × 2줄 = 8개
+  const MEMOS_PER_PAGE = 8; // 1줄 4개 × 2줄 = 8개
 
   let allMemos = [];
   let filteredAndSortedMemos = [];
   let currentPage = 1;
   let currentSort = 'recent';
 
-  // 1. 메모 목록 불러오기 (GET /api/memos)
+  // 1. 메모 목록 불러오기
   async function loadMemos() {
     try {
       const res = await fetch('/api/memos');
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderCurrentPage();
   }
 
-  // 2. 현재 페이지 렌더링 & 숫자 버튼 생성
+  // 2. 현재 페이지 렌더링 & 알약형 페이지 번호 버튼 생성
   function renderCurrentPage() {
     const totalMemos = filteredAndSortedMemos.length;
     const totalPages = Math.max(1, Math.ceil(totalMemos / MEMOS_PER_PAGE));
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    // 그리드 카드 렌더링
+    // 그리드 렌더링
     memoGrid.innerHTML = pageMemos.map((memo, idx) => {
       const rot = rotations[idx % rotations.length];
       const commentCount = memo.comments ? memo.comments.length : 0;
@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
     }).join('');
 
-    // 숫자 번호 탭 렌더링
+    // 알약형 페이지네이션 렌더링
     if (paginationContainer) {
       if (totalPages > 1) {
         paginationContainer.classList.remove('hidden');
@@ -199,10 +199,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             <button 
               type="button" 
               data-page="${i}" 
-              class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition shadow-sm ${
+              class="px-3 py-1 rounded-full text-xs transition duration-150 ${
                 isActive 
-                  ? 'bg-[#B04A36] text-white shadow-md scale-105' 
-                  : 'bg-white/90 hover:bg-white text-gray-700 hover:scale-105'
+                  ? 'bg-[#B04A36] text-white font-bold shadow-sm' 
+                  : 'text-white/80 hover:text-white hover:bg-white/10 font-medium'
               }"
             >
               ${i}
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         pageNumberButtons.innerHTML = buttonsHtml;
 
-        // 생성된 번호 버튼에 클릭 이벤트 바인딩
+        // 번호 클릭 이벤트
         pageNumberButtons.querySelectorAll('button').forEach(btn => {
           btn.addEventListener('click', (e) => {
             const page = parseInt(e.currentTarget.getAttribute('data-page'), 10);

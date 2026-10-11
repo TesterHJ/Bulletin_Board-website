@@ -113,30 +113,32 @@
         </div>
       </div>
 
-      <!-- 하단 숫자 페이지네이션 (1번 스타일) -->
-      <nav id="paginationContainer" class="flex items-center justify-center gap-2 mt-10 mb-4 select-none hidden" aria-label="메모 페이지 번호">
-        <!-- 이전 페이지 버튼 -->
-        <button 
-          id="btnPrevPage" 
-          type="button" 
-          class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-white/90 hover:bg-white text-gray-800 disabled:opacity-30 disabled:hover:bg-white/90 disabled:cursor-not-allowed shadow transition active:scale-95"
-          title="이전 페이지"
-        >
-          ‹
-        </button>
+      <!-- 하단 알약형(Pill) 페이지네이션 트랙 -->
+      <nav id="paginationContainer" class="flex items-center justify-center mt-10 mb-4 select-none hidden" aria-label="메모 페이지 이동">
+        <div class="inline-flex items-center gap-1 bg-black/25 p-1 rounded-full backdrop-blur-sm border border-white/10 shadow-inner">
+          <!-- 이전 페이지 버튼 -->
+          <button 
+            id="btnPrevPage" 
+            type="button" 
+            class="px-2.5 py-1 rounded-full text-xs font-bold transition duration-150 text-white/80 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+            title="이전 페이지"
+          >
+            ‹
+          </button>
 
-        <!-- 동적 숫자 버튼 컨테이너 -->
-        <div id="pageNumberButtons" class="flex items-center gap-1.5"></div>
+          <!-- 페이지 번호 캡슐 버튼 컨테이너 -->
+          <div id="pageNumberButtons" class="inline-flex items-center gap-1"></div>
 
-        <!-- 다음 페이지 버튼 -->
-        <button 
-          id="btnNextPage" 
-          type="button" 
-          class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-white/90 hover:bg-white text-gray-800 disabled:opacity-30 disabled:hover:bg-white/90 disabled:cursor-not-allowed shadow transition active:scale-95"
-          title="다음 페이지"
-        >
-          ›
-        </button>
+          <!-- 다음 페이지 버튼 -->
+          <button 
+            id="btnNextPage" 
+            type="button" 
+            class="px-2.5 py-1 rounded-full text-xs font-bold transition duration-150 text-white/80 hover:text-white hover:bg-white/10 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+            title="다음 페이지"
+          >
+            ›
+          </button>
+        </div>
       </nav>
 
     </div>
