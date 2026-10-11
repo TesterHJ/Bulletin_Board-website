@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const memoForm = document.getElementById('memoForm');
   const titleInput = document.getElementById('titleInput');
   const contentInput = document.getElementById('contentInput');
+  const anonymousCheckbox = document.getElementById('anonymousCheckbox');
   const openDeleteModalBtn = document.getElementById('openDeleteModalBtn');
   const submitBtn = memoForm.querySelector('button[type="submit"]');
 
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const previewCard = document.getElementById('previewCard');
   const previewTitle = document.getElementById('previewTitle');
   const previewContent = document.getElementById('previewContent');
+  const previewAuthor = document.getElementById('previewAuthor');
   const previewFooter = document.getElementById('previewFooter');
 
   const deleteModal = document.getElementById('deleteModal');
@@ -25,13 +27,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
 
-  // 관리자 전용 색상 버튼 표시 여부
+  // 작성자 미리보기 갱신 함수
+  function updatePreviewAuthor() {
+    if (anonymousCheckbox && anonymousCheckbox.checked) {
+      previewAuthor.textContent = '익명';
+    } else {
+      previewAuthor.textContent = currentUser ? currentUser.nickname : '익명';
+    }
+  }
+
+  // 관리자 전용 색상 칩 노출
   if (currentUser && currentUser.role === 'admin' && adminColorOption) {
     adminColorOption.classList.remove('hidden');
     adminColorOption.classList.add('flex');
   }
 
-  // 실시간 미리보기 카드 색상/글자색 동기화 함수
+  // 실시간 미리보기 카드 색상/글자색 동기화
   function updatePreviewColor(color) {
     previewCard.style.backgroundColor = color;
     if (color === '#2D3436') {
@@ -45,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 실시간 타이핑 미리보기
+  // 입력 이벤트
   titleInput.addEventListener('input', (e) => {
     const val = e.target.value;
     previewTitle.textContent = val || '제목을 입력해 주세요';
@@ -58,12 +69,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     contentCounter.textContent = `${val.length} / 2,000`;
   });
 
-  // 색상 라디오 변경 이벤트
+  if (anonymousCheckbox) {
+    anonymousCheckbox.addEventListener('change', updatePreviewAuthor);
+  }
+
+  // 색상 선택 이벤트
   document.querySelectorAll('input[name="memoColor"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
       updatePreviewColor(e.target.value);
     });
   });
+
+  // 초기 미리보기 작성자 세팅
+  updatePreviewAuthor();
 
   // 작성 / 수정 모드 분기
   if (memoId) {
@@ -75,7 +93,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!res.ok) throw new Error('메모를 불러올 수 없습니다.');
       const memo = await res.json();
       
-      const isAuthor = currentUser && currentUser.nickname === memo.author;
+      // 본인 작성 검증 (닉네임 일치 or ownerUsername 일치 or 관리자)
+      const isAuthor = currentUser && (
+        currentUser.nickname === memo.author || 
+        (memo.ownerUsername && currentUser.username === memo.ownerUsername)
+      );
       const isAdmin = currentUser && currentUser.role === 'admin';
 
       if (!isAuthor && !isAdmin) {
@@ -87,7 +109,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       titleInput.value = memo.title;
       contentInput.value = memo.content;
 
-      // 수정할 글이 다크 블랙 색상인 경우 관리자 색상 옵션 노출
+      // 기존 글이 익명이었을 경우 체크박스 활성화
+      if (memo.author === '익명' && anonymousCheckbox) {
+        anonymousCheckbox.checked = true;
+      }
+
       if (memo.color === '#2D3436' && adminColorOption) {
         adminColorOption.classList.remove('hidden');
         adminColorOption.classList.add('flex');
@@ -103,6 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       previewContent.textContent = memo.content;
       titleCounter.textContent = `${memo.title.length} / 40`;
       contentCounter.textContent = `${memo.content.length} / 2,000`;
+      updatePreviewAuthor();
       deleteModalDesc.textContent = `'${memo.title}' 글과 댓글이 게시판에서 사라집니다. 삭제한 글은 복구할 수 없어요.`;
     } catch (err) {
       alert(err.message);
@@ -120,18 +147,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const selectedColor = document.querySelector('input[name="memoColor"]:checked')?.value || '#FEF9C3';
 
-    // 일반 유저가 다크 블랙 색상을 사용할 경우 방어
     if (selectedColor === '#2D3436' && (!currentUser || currentUser.role !== 'admin')) {
       alert('관리자 전용 색상입니다.');
       return;
     }
 
+    const isAnonymous = anonymousCheckbox ? anonymousCheckbox.checked : false;
+    const displayName = isAnonymous ? '익명' : (currentUser ? currentUser.nickname : '익명');
+
     const payload = {
       title: titleInput.value.trim(),
       content: contentInput.value.trim(),
       color: selectedColor,
-      author: currentUser ? currentUser.nickname : '익명',
+      author: displayName,
+      ownerUsername: currentUser ? currentUser.username : null, // 원작자 확인용
       requester: currentUser ? currentUser.nickname : null,
+      username: currentUser ? currentUser.username : null,
       isAdmin: currentUser?.role === 'admin'
     };
 
@@ -162,11 +193,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 모달 제어
+  // 삭제 모달 열기/닫기
   openDeleteModalBtn.addEventListener('click', () => deleteModal.classList.remove('hidden'));
   closeDeleteModalBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
 
-  // 삭제 처리
+  // 삭제 실행
   confirmDeleteBtn.addEventListener('click', async () => {
     if (!memoId) return;
 
@@ -176,6 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           requester: currentUser ? currentUser.nickname : null,
+          username: currentUser ? currentUser.username : null,
           isAdmin: currentUser?.role === 'admin'
         })
       });

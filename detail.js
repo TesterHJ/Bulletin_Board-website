@@ -36,7 +36,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
 
-      const isAuthor = currentUser && currentUser.nickname === memo.author;
+      // 본인 글 판별 (닉네임 일치 or ownerUsername 일치 or 관리자)
+      const isAuthor = currentUser && (
+        currentUser.nickname === memo.author ||
+        (memo.ownerUsername && currentUser.username === memo.ownerUsername)
+      );
       const isAdmin = currentUser && currentUser.role === 'admin';
 
       if (!isAuthor && !isAdmin) {
@@ -51,7 +55,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         memoArticleCard.style.backgroundColor = memoColor;
         memoArticleCard.classList.remove('bg-[#FCFBF7]');
 
-        // 검은색(다크 모드)일 경우 텍스트 및 경계선 색상 대응
         if (memoColor === '#2D3436') {
           memoTitle.className = 'text-2xl md:text-3xl font-extrabold text-white mb-4 tracking-tight leading-snug';
           memoContent.className = 'space-y-4 text-[15px] leading-relaxed text-gray-200 whitespace-pre-line';
@@ -97,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 공감 버튼 클릭 핸들러
+  // 공감 버튼 핸들러
   let isLiking = false;
   likeBtn.addEventListener('click', async () => {
     if (isLiking) return;
@@ -126,7 +129,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (likeCount) likeCount.textContent = data.likes;
 
-      // 클릭 시 일시적인 진한 피드백 후 원래 흰색 유지
       likeBtn.classList.add('scale-105', 'bg-stone-300');
       setTimeout(() => {
         likeBtn.classList.remove('scale-105', 'bg-stone-300');

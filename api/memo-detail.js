@@ -39,7 +39,7 @@ export default async function handler(req, res) {
       return res.status(201).json({ success: true, comment: newComment });
     }
 
-    // 3. 공감(좋아요) 처리 (PATCH) - 계정당 1회 제한 (관리자 예외)
+    // 3. 공감 처리 (PATCH)
     if (req.method === 'PATCH') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const { username, isAdmin } = body || {};
@@ -51,14 +51,12 @@ export default async function handler(req, res) {
       const existingMemo = await memosCollection.findOne({ _id: memoId });
       if (!existingMemo) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
 
-      // 관리자가 아닌 일반 회원인 경우 중복 체크
       if (!isAdmin) {
         const likedUsers = existingMemo.likedUsers || [];
         if (likedUsers.includes(username)) {
           return res.status(409).json({ error: '이미 공감한 메모입니다.' });
         }
 
-        // 일반 유저: likedUsers에 아이디 추가 및 likes +1
         const updated = await memosCollection.findOneAndUpdate(
           { _id: memoId },
           { 
@@ -68,7 +66,6 @@ export default async function handler(req, res) {
         );
         return res.status(200).json({ success: true, likes: updated.likes });
       } else {
-        // 관리자: 중복 제한 없이 계속 공감 누적 가능
         const updated = await memosCollection.findOneAndUpdate(
           { _id: memoId },
           { $inc: { likes: 1 } },
@@ -81,7 +78,7 @@ export default async function handler(req, res) {
     // 4. 메모 수정 (PUT)
     if (req.method === 'PUT') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-      const { title, content, color, requester } = body || {};
+      const { title, content, color, author, requester, username, isAdmin } = body || {};
 
       if (!title || !content) {
         return res.status(400).json({ error: '제목과 내용을 입력해 주세요.' });
@@ -90,7 +87,13 @@ export default async function handler(req, res) {
       const existingMemo = await memosCollection.findOne({ _id: memoId });
       if (!existingMemo) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
 
-      if (existingMemo.author === '익명' || existingMemo.author !== requester) {
+      // 본인 확인: 관리자이거나, 닉네임 일치하거나, ownerUsername 일치할 때
+      const isOwner = (
+        (existingMemo.ownerUsername && username && existingMemo.ownerUsername === username) ||
+        (existingMemo.author !== '익명' && existingMemo.author === requester)
+      );
+
+      if (!isAdmin && !isOwner) {
         return res.status(403).json({ error: '본인이 작성한 메모만 수정할 수 있습니다.' });
       }
 
@@ -100,7 +103,8 @@ export default async function handler(req, res) {
           $set: { 
             title: title.trim(), 
             content: content.trim(), 
-            color: color || '#FEF9C3', 
+            color: color || '#FEF9C3',
+            author: author || existingMemo.author,
             updatedAt: new Date() 
           } 
         }
@@ -111,12 +115,17 @@ export default async function handler(req, res) {
     // 5. 메모 삭제 (DELETE)
     if (req.method === 'DELETE') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-      const { requester, isAdmin } = body || {};
+      const { requester, username, isAdmin } = body || {};
 
       const existingMemo = await memosCollection.findOne({ _id: memoId });
       if (!existingMemo) return res.status(404).json({ error: '메모를 찾을 수 없습니다.' });
 
-      if (!isAdmin && (existingMemo.author === '익명' || existingMemo.author !== requester)) {
+      const isOwner = (
+        (existingMemo.ownerUsername && username && existingMemo.ownerUsername === username) ||
+        (existingMemo.author !== '익명' && existingMemo.author === requester)
+      );
+
+      if (!isAdmin && !isOwner) {
         return res.status(403).json({ error: '본인이 작성한 메모만 삭제할 수 있습니다.' });
       }
 
