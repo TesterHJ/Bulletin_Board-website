@@ -31,9 +31,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const colorInputs = document.querySelectorAll('input[name="memoColor"]');
 
-  // 관리자 전용 색상 토글
+  // 관리자 전용 색상 토글 (flex 클래스 명시하여 인라인 가로 정렬 보장)
   if (currentUser && currentUser.role === 'admin') {
-    if (adminColorOption) adminColorOption.classList.remove('hidden');
+    if (adminColorOption) {
+      adminColorOption.classList.remove('hidden');
+      adminColorOption.classList.add('flex');
+    }
   }
 
   // 1. 수정 모드일 때 기존 데이터 불러오기
