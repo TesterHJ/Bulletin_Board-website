@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw new Error(resData.error || resData.message || `서버 응답 오류 (${res.status})`);
       }
 
-      alert(memoId ? '메모가 수정되었습니다!' : '새 메모가 나무 벽에 붙었습니다!');
+      alert(memoId ? '메모가 수정되었습니다!' : '새 메모가 나무판에 붙었습니다!');
       window.location.href = memoId ? `detail.html?id=${memoId}` : 'index.html';
     } catch (err) {
       alert(`저장 실패: ${err.message}`);
