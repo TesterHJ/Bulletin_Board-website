@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const memoCountText = document.getElementById('memoCountText');
   const searchInput = document.getElementById('searchInput');
   const sortPills = document.querySelectorAll('.sort-pill');
+  const btnNewMemoMain = document.getElementById('btnNewMemoMain');
 
   // 페이지네이션 관련 요소
   const paginationContainer = document.getElementById('paginationContainer');
@@ -18,7 +19,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentPage = 1;
   let currentSort = 'recent';
 
-  // 1. 메모 목록 불러오기
+  // 1. 메인 '+ 새 메모' 버튼 비로그인 체크 핸들러
+  if (btnNewMemoMain) {
+    btnNewMemoMain.addEventListener('click', (e) => {
+      const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+      if (!currentUser) {
+        e.preventDefault();
+        alert('로그인한 회원만 메모를 작성할 수 있습니다.');
+        if (typeof openAuthModal === 'function') {
+          openAuthModal('login');
+        }
+      }
+    });
+  }
+
+  // 2. 메모 목록 불러오기
   async function loadMemos() {
     try {
       const res = await fetch('/api/memos');
@@ -37,10 +52,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 오늘 00:00:00 자정 타임스탬프
+  // 오늘 00:00:00 자정 타임스탬프 (한국 표준시 KST 기준)
   function getStartOfToday() {
     const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const kstFormatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    const [year, month, day] = kstFormatter.format(now).split('-');
+    return new Date(`${year}-${month}-${day}T00:00:00+09:00`).getTime();
   }
 
   function sortMemos(list, criterion) {
@@ -90,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderCurrentPage();
   }
 
-  // 2. 현재 페이지 렌더링 & 알약형 페이지 번호 버튼 생성
+  // 3. 현재 페이지 렌더링 & 알약형 페이지 번호 버튼 생성
   function renderCurrentPage() {
     const totalMemos = filteredAndSortedMemos.length;
     const totalPages = Math.max(1, Math.ceil(totalMemos / MEMOS_PER_PAGE));
@@ -123,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const startIndex = (currentPage - 1) * MEMOS_PER_PAGE;
     const pageMemos = filteredAndSortedMemos.slice(startIndex, startIndex + MEMOS_PER_PAGE);
 
-    // 당일 최다 공감 메모
+    // 당일 최다 공감 메모 선정
     const startOfToday = getStartOfToday();
     const todayMemosWithLikes = allMemos.filter(memo => {
       const created = memo.createdAt ? new Date(memo.createdAt).getTime() : 0;
@@ -241,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 3. 이전 / 다음 화살표 클릭 이벤트
+  // 4. 이전 / 다음 화살표 클릭 이벤트
   if (btnPrevPage) {
     btnPrevPage.addEventListener('click', () => {
       if (currentPage > 1) {
@@ -263,7 +285,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 4. 정렬 칩 클릭 이벤트
+  // 5. 정렬 칩 클릭 이벤트
   sortPills.forEach(pill => {
     pill.addEventListener('click', () => {
       const selectedSort = pill.getAttribute('data-sort');
@@ -284,7 +306,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 5. 검색 필터링
+  // 6. 검색 필터링
   if (searchInput) {
     searchInput.addEventListener('input', () => {
       currentPage = 1;
