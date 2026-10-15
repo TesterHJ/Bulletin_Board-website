@@ -112,9 +112,14 @@
             <span class="text-xs text-gray-400">등록순</span>
           </div>
 
+          <!-- 댓글 입력 영역 (익명 체크박스 추가됨) -->
           <div class="bg-[#F8F9FA] rounded-lg p-3 border border-gray-200 mb-4">
-            <div class="flex items-center gap-1.5 mb-2">
+            <div class="flex items-center justify-between mb-2">
               <span class="text-[11px] font-semibold text-gray-700">댓글 남기기</span>
+              <label class="flex items-center gap-1.5 text-[11px] text-gray-600 cursor-pointer select-none">
+                <input type="checkbox" id="commentAnonymousCheckbox" class="w-3.5 h-3.5 text-[#B04A36] rounded border-gray-300 focus:ring-[#B04A36] cursor-pointer" />
+                익명
+              </label>
             </div>
             <textarea 
               id="commentInput" 

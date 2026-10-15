@@ -27,11 +27,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const commentList = document.getElementById('commentList');
   const commentInput = document.getElementById('commentInput');
   const commentCharCount = document.getElementById('commentCharCount');
+  const commentAnonymousCheckbox = document.getElementById('commentAnonymousCheckbox');
   const submitCommentBtn = document.getElementById('submitCommentBtn');
 
   let currentLoadedMemo = null; // 메모 정보 캐싱
 
-  editLink.href = `edit.html?id=${memoId}`;
+  if (editLink) editLink.href = `edit.html?id=${memoId}`;
 
   // 1. 메모 상세 로드
   async function loadMemoDetail() {
@@ -102,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         likeBtn.classList.add('border-[#FFA8A8]', 'text-[#E03131]');
       }
 
-      renderComments(memo.comments || []);
+      renderComments(memo.comments || [], memo);
     } catch (err) {
       alert(err.message);
       window.location.href = 'index.html';
@@ -139,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       const reason = prompt('신고 사유를 작성해 주세요 (예: 욕설, 비방, 음란물, 도배 등):');
-      if (reason === null) return; // 취소 클릭
+      if (reason === null) return;
 
       try {
         const res = await fetch('/api/memo-report', {
@@ -153,9 +154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || '신고 접수에 실패했습니다.');
-        }
+        if (!res.ok) throw new Error(data.error || '신고 접수에 실패했습니다.');
 
         alert('신고가 성공적으로 접수되었습니다. 관리자 확인 후 처리됩니다.');
       } catch (err) {
@@ -166,48 +165,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 4. 공감 버튼 핸들러 (1회 제한, 관리자 무제한)
   let isLiking = false;
-  likeBtn.addEventListener('click', async () => {
-    if (isLiking) return;
+  if (likeBtn) {
+    likeBtn.addEventListener('click', async () => {
+      if (isLiking) return;
 
-    const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
-    if (!currentUser) {
-      alert('로그인한 회원만 공감할 수 있습니다.');
-      if (typeof openAuthModal === 'function') openAuthModal('login');
-      return;
-    }
+      const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+      if (!currentUser) {
+        alert('로그인한 회원만 공감할 수 있습니다.');
+        if (typeof openAuthModal === 'function') openAuthModal('login');
+        return;
+      }
 
-    isLiking = true;
+      isLiking = true;
 
-    try {
-      const res = await fetch(`/api/memo-detail?id=${memoId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: currentUser.username,
-          isAdmin: currentUser.role === 'admin'
-        })
-      });
+      try {
+        const res = await fetch(`/api/memo-detail?id=${memoId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: currentUser.username,
+            isAdmin: currentUser.role === 'admin'
+          })
+        });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '공감 처리에 실패했습니다.');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || '공감 처리에 실패했습니다.');
 
-      if (likeCount) likeCount.textContent = data.likes;
+        if (likeCount) likeCount.textContent = data.likes;
 
-      likeBtn.classList.add('scale-105', 'bg-stone-300');
-      setTimeout(() => {
-        likeBtn.classList.remove('scale-105', 'bg-stone-300');
-        likeBtn.classList.add('bg-white');
-      }, 250);
+        likeBtn.classList.add('scale-105', 'bg-stone-300');
+        setTimeout(() => {
+          likeBtn.classList.remove('scale-105', 'bg-stone-300');
+          likeBtn.classList.add('bg-white');
+        }, 250);
 
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      isLiking = false;
-    }
-  });
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        isLiking = false;
+      }
+    });
+  }
 
   // 5. 댓글 렌더링
-  function renderComments(comments) {
+  function renderComments(comments, memo) {
     if (commentTotalCount) commentTotalCount.textContent = comments.length;
 
     if (!comments || comments.length === 0) {
@@ -220,7 +221,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     commentList.innerHTML = comments.map(comment => {
       const authorName = comment.author || '익명';
       const initial = authorName[0];
-      const isMe = currentUser && currentUser.nickname === authorName;
+
+      // 본인 댓글 여부 판별
+      const isMe = currentUser && (
+        (comment.ownerUsername && currentUser.username === comment.ownerUsername) ||
+        (authorName !== '익명' && currentUser.nickname === authorName)
+      );
+
+      // 원글 작성자 본인의 댓글 여부 판별
+      const isMemoAuthor = memo && (
+        (comment.ownerUsername && memo.ownerUsername && comment.ownerUsername === memo.ownerUsername) ||
+        (memo.author !== '익명' && comment.author === memo.author)
+      );
+
       const timeStr = comment.createdAt ? new Date(comment.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '';
 
       return `
@@ -232,7 +245,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="flex items-center justify-between mb-1">
               <div class="flex items-center gap-1">
                 <span class="font-bold text-gray-800">${escapeHtml(authorName)}</span>
-                ${isMe ? `<span class="text-[10px] text-[#15AABF] font-semibold bg-[#E3FAFC] px-1 rounded">나</span>` : ''}
+                ${isMemoAuthor ? `<span class="text-[9px] text-[#B04A36] font-bold bg-[#B04A36]/10 px-1 py-0.5 rounded">작성자</span>` : ''}
+                ${isMe ? `<span class="text-[9px] text-[#15AABF] font-bold bg-[#E3FAFC] px-1 py-0.5 rounded">나</span>` : ''}
               </div>
               <span class="text-[10px] text-gray-400">${timeStr}</span>
             </div>
@@ -243,39 +257,63 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).join('');
   }
 
-  commentInput.addEventListener('input', (e) => {
-    commentCharCount.textContent = `${e.target.value.length}/300`;
-  });
+  if (commentInput) {
+    commentInput.addEventListener('input', (e) => {
+      commentCharCount.textContent = `${e.target.value.length}/300`;
+    });
 
-  // 6. 댓글 등록
-  submitCommentBtn.addEventListener('click', async () => {
-    const text = commentInput.value.trim();
-    if (!text) {
-      alert('댓글을 입력해 주세요.');
-      return;
-    }
+    // 비로그인 사용자가 댓글 입력창 포커스 시 즉시 로그인 유도
+    commentInput.addEventListener('focus', () => {
+      const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+      if (!currentUser) {
+        commentInput.blur();
+        alert('로그인한 회원만 댓글을 남길 수 있습니다.');
+        if (typeof openAuthModal === 'function') openAuthModal('login');
+      }
+    });
+  }
 
-    const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+  // 6. 댓글 등록 (로그인 검증 및 익명 선택 반영)
+  if (submitCommentBtn) {
+    submitCommentBtn.addEventListener('click', async () => {
+      const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+      if (!currentUser) {
+        alert('로그인한 회원만 댓글을 남길 수 있습니다.');
+        if (typeof openAuthModal === 'function') openAuthModal('login');
+        return;
+      }
 
-    try {
-      const res = await fetch(`/api/memo-detail?id=${memoId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          text, 
-          author: currentUser ? currentUser.nickname : '익명' 
-        })
-      });
+      const text = commentInput.value.trim();
+      if (!text) {
+        alert('댓글을 입력해 주세요.');
+        return;
+      }
 
-      if (!res.ok) throw new Error('댓글 등록에 실패했습니다.');
+      const isAnonymous = commentAnonymousCheckbox ? commentAnonymousCheckbox.checked : false;
+      const author = isAnonymous ? '익명' : currentUser.nickname;
 
-      commentInput.value = '';
-      commentCharCount.textContent = '0/300';
-      loadMemoDetail();
-    } catch (err) {
-      alert(err.message);
-    }
-  });
+      try {
+        const res = await fetch(`/api/memo-detail?id=${memoId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            text, 
+            author,
+            ownerUsername: currentUser.username
+          })
+        });
+
+        if (!res.ok) throw new Error('댓글 등록에 실패했습니다.');
+
+        commentInput.value = '';
+        commentCharCount.textContent = '0/300';
+        if (commentAnonymousCheckbox) commentAnonymousCheckbox.checked = false;
+        loadMemoDetail();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  }
 
   function escapeHtml(text) {
     if (!text) return '';
