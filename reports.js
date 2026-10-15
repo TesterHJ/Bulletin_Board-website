@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!memos || memos.length === 0) {
       reportListContainer.innerHTML = `
         <div class="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400 text-xs">
-          현재 접수된 신고 메모가 없습니다. 깨끗한 나무 벽입니다! 🌿
+          현재 접수된 신고 메모가 없습니다. 깨끗한 나무판입니다! 🌿
         </div>
       `;
       return;
