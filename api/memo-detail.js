@@ -95,10 +95,14 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, message: '메모가 삭제되었습니다.' });
     }
 
-    // 4. 댓글 작성 (POST) - ownerUsername 저장 추가
+    // 4. 댓글 작성 (POST) - 로그인 필수 검증 추가
     if (req.method === 'POST') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const { text, author, ownerUsername } = body || {};
+
+      if (!ownerUsername || !ownerUsername.trim()) {
+        return res.status(401).json({ error: '로그인한 회원만 댓글을 작성할 수 있습니다.' });
+      }
 
       if (!text || !text.trim()) {
         return res.status(400).json({ error: '댓글 내용을 입력해 주세요.' });
@@ -108,7 +112,7 @@ export default async function handler(req, res) {
         _id: new ObjectId(),
         text: text.trim(),
         author: (author || '익명').trim(),
-        ownerUsername: (ownerUsername || '').trim(), // 익명이어도 소유자 식별값 보관
+        ownerUsername: ownerUsername.trim(),
         createdAt: new Date()
       };
 
