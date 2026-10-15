@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const contentCounter = document.getElementById('contentCounter');
   const anonymousCheckbox = document.getElementById('anonymousCheckbox');
   const adminColorOption = document.getElementById('adminColorOption');
+  const submitBtnText = document.getElementById('submitBtnText');
 
   const previewCard = document.getElementById('previewCard');
   const previewTitle = document.getElementById('previewTitle');
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 1. 수정 모드일 때 기존 데이터 불러오기
   if (memoId) {
     pageTitle.textContent = '메모 다듬기';
+    if (submitBtnText) submitBtnText.textContent = '메모 수정하기';
     if (openDeleteModalBtn) openDeleteModalBtn.classList.remove('hidden');
 
     try {
@@ -77,6 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } else {
     pageTitle.textContent = '새 메모 붙이기';
+    if (submitBtnText) submitBtnText.textContent = '메모 붙이기';
     if (openDeleteModalBtn) openDeleteModalBtn.classList.add('hidden');
     updatePreview();
   }

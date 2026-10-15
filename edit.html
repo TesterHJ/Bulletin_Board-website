@@ -52,136 +52,152 @@
   <main class="wood-board flex-1 p-6 md:p-10 flex flex-col items-center justify-center">
     <div class="max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-stone-200 my-auto">
 
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 p-6 md:p-8 items-start">
-        <!-- 좌측: 입력 폼 -->
-        <form id="memoForm" class="md:col-span-7 space-y-5">
-          <h2 id="pageTitle" class="text-xl font-extrabold text-[#B04A36]">새 메모 붙이기</h2>
+      <!-- 전체 폼 태그 -->
+      <form id="memoForm" class="p-6 md:p-8 flex flex-col">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-6">
+          
+          <!-- 좌측: 입력 필드 영역 -->
+          <div class="md:col-span-7 space-y-5">
+            <h2 id="pageTitle" class="text-xl font-extrabold text-[#B04A36]">새 메모 붙이기</h2>
 
-          <!-- 제목 입력 -->
-          <div>
-            <div class="flex justify-between items-center mb-1">
-              <label for="titleInput" class="text-xs font-bold text-gray-700">제목</label>
-              <span id="titleCounter" class="text-[11px] text-gray-400">0 / 40</span>
-            </div>
-            <input 
-              type="text" 
-              id="titleInput" 
-              maxlength="40" 
-              placeholder="제목을 입력해 주세요." 
-              class="w-full text-xs p-3 border rounded-lg border-gray-300 focus:outline-none focus:border-[#B04A36] transition"
-              required 
-            />
-          </div>
-
-          <!-- 내용 입력 -->
-          <div>
-            <div class="flex justify-between items-center mb-1">
-              <label for="contentInput" class="text-xs font-bold text-gray-700">내용</label>
-              <span id="contentCounter" class="text-[11px] text-gray-400">0 / 2,000</span>
-            </div>
-            <textarea 
-              id="contentInput" 
-              rows="6" 
-              maxlength="2000" 
-              placeholder="마음에 남길 이야기를 적어보세요." 
-              class="w-full text-xs p-3 border rounded-lg border-gray-300 focus:outline-none focus:border-[#B04A36] transition resize-none leading-relaxed"
-              required
-            ></textarea>
-          </div>
-
-          <!-- 익명 설정 체크박스 옵션 -->
-          <div class="flex items-center justify-between p-3 bg-stone-50 rounded-lg border border-stone-200">
+            <!-- 제목 입력 -->
             <div>
-              <label for="anonymousCheckbox" class="text-xs font-bold text-gray-800 cursor-pointer select-none">
-                익명으로 남기기
-              </label>
-              <p class="text-[11px] text-gray-500 mt-0.5">내 닉네임을 숨기고 '익명'으로 게시합니다.</p>
+              <div class="flex justify-between items-center mb-1">
+                <label for="titleInput" class="text-xs font-bold text-gray-700">제목</label>
+                <span id="titleCounter" class="text-[11px] text-gray-400">0 / 40</span>
+              </div>
+              <input 
+                type="text" 
+                id="titleInput" 
+                maxlength="40" 
+                placeholder="제목을 입력해 주세요." 
+                class="w-full text-xs p-3 border rounded-lg border-gray-300 focus:outline-none focus:border-[#B04A36] transition shadow-sm" 
+                required 
+              />
             </div>
-            <input 
-              type="checkbox" 
-              id="anonymousCheckbox" 
-              class="w-4 h-4 text-[#B04A36] rounded border-gray-300 focus:ring-[#B04A36] cursor-pointer" 
-            />
-          </div>
 
-          <!-- 메모지 색상 선택 -->
-          <div>
-            <label class="block text-xs font-bold text-gray-700 mb-2">메모지 색상</label>
-            <div class="flex items-center gap-3 flex-wrap">
-              <label class="cursor-pointer" title="클래식 옐로우">
-                <input type="radio" name="memoColor" value="#FEF9C3" checked class="hidden peer" />
-                <span class="w-7 h-7 rounded-full bg-[#FEF9C3] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition"></span>
-              </label>
-              <label class="cursor-pointer" title="민트 그린">
-                <input type="radio" name="memoColor" value="#DCFCE7" class="hidden peer" />
-                <span class="w-7 h-7 rounded-full bg-[#DCFCE7] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition"></span>
-              </label>
-              <label class="cursor-pointer" title="스카이 블루">
-                <input type="radio" name="memoColor" value="#E0F2FE" class="hidden peer" />
-                <span class="w-7 h-7 rounded-full bg-[#E0F2FE] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition"></span>
-              </label>
-              <label class="cursor-pointer" title="베이비 핑크">
-                <input type="radio" name="memoColor" value="#FCE7F3" class="hidden peer" />
-                <span class="w-7 h-7 rounded-full bg-[#FCE7F3] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition"></span>
-              </label>
+            <!-- 내용 입력 -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label for="contentInput" class="text-xs font-bold text-gray-700">내용</label>
+                <span id="contentCounter" class="text-[11px] text-gray-400">0 / 2,000</span>
+              </div>
+              <textarea 
+                id="contentInput" 
+                rows="6" 
+                maxlength="2000" 
+                placeholder="마음에 남길 이야기를 적어보세요." 
+                class="w-full text-xs p-3 border rounded-lg border-gray-300 focus:outline-none focus:border-[#B04A36] transition resize-none leading-relaxed shadow-sm" 
+                required
+              ></textarea>
+            </div>
 
-              <!-- 관리자 전용 색상 -->
-              <div id="adminColorOption" class="hidden items-center gap-1.5 pl-2 border-l border-gray-200">
-                <label class="cursor-pointer relative" title="관리자 전용 다크 차콜">
-                  <input type="radio" name="memoColor" value="#2D3436" class="hidden peer" />
-                  <span class="w-7 h-7 rounded-full bg-[#2D3436] border-2 border-gray-500 peer-checked:border-red-500 peer-checked:ring-2 peer-checked:ring-red-500/30 block transition shadow-md"></span>
-                  <span class="absolute -top-1.5 -right-1 text-[10px]">👑</span>
+            <!-- 익명 설정 체크박스 옵션 -->
+            <div class="flex items-center justify-between p-3 bg-stone-50 rounded-lg border border-stone-200">
+              <div>
+                <label for="anonymousCheckbox" class="text-xs font-bold text-gray-800 cursor-pointer select-none">
+                  익명으로 남기기
                 </label>
-                <span class="text-[10px] text-gray-800 font-bold bg-gray-100 border border-gray-300 px-1.5 py-0.5 rounded">관리자 전용</span>
+                <p class="text-[11px] text-gray-500 mt-0.5">내 닉네임을 숨기고 '익명'으로 게시합니다.</p>
+              </div>
+              <input 
+                type="checkbox" 
+                id="anonymousCheckbox" 
+                class="w-4 h-4 text-[#B04A36] rounded border-gray-300 focus:ring-[#B04A36] cursor-pointer" 
+              />
+            </div>
+
+            <!-- 메모지 색상 선택 -->
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-2">메모지 색상</label>
+              <div class="flex items-center gap-3 flex-wrap">
+                <label class="cursor-pointer" title="클래식 옐로우">
+                  <input type="radio" name="memoColor" value="#FEF9C3" checked class="hidden peer" />
+                  <span class="w-7 h-7 rounded-full bg-[#FEF9C3] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition shadow-sm"></span>
+                </label>
+                <label class="cursor-pointer" title="민트 그린">
+                  <input type="radio" name="memoColor" value="#DCFCE7" class="hidden peer" />
+                  <span class="w-7 h-7 rounded-full bg-[#DCFCE7] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition shadow-sm"></span>
+                </label>
+                <label class="cursor-pointer" title="스카이 블루">
+                  <input type="radio" name="memoColor" value="#E0F2FE" class="hidden peer" />
+                  <span class="w-7 h-7 rounded-full bg-[#E0F2FE] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition shadow-sm"></span>
+                </label>
+                <label class="cursor-pointer" title="베이비 핑크">
+                  <input type="radio" name="memoColor" value="#FCE7F3" class="hidden peer" />
+                  <span class="w-7 h-7 rounded-full bg-[#FCE7F3] border-2 border-stone-300 peer-checked:border-[#B04A36] peer-checked:ring-2 peer-checked:ring-[#B04A36]/20 block transition shadow-sm"></span>
+                </label>
+
+                <!-- 관리자 전용 색상 -->
+                <div id="adminColorOption" class="hidden items-center gap-1.5 pl-2 border-l border-gray-200">
+                  <label class="cursor-pointer relative" title="관리자 전용 다크 차콜">
+                    <input type="radio" name="memoColor" value="#2D3436" class="hidden peer" />
+                    <span class="w-7 h-7 rounded-full bg-[#2D3436] border-2 border-gray-500 peer-checked:border-red-500 peer-checked:ring-2 peer-checked:ring-red-500/30 block transition shadow-md"></span>
+                    <span class="absolute -top-1.5 -right-1 text-[10px]">👑</span>
+                  </label>
+                  <span class="text-[10px] text-gray-800 font-bold bg-gray-100 border border-gray-300 px-1.5 py-0.5 rounded">관리자 전용</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- 하단 버튼 영역 -->
-          <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+          <!-- 우측: 실시간 미리보기 -->
+          <div class="md:col-span-5 flex flex-col pt-1">
+            <span class="text-xs font-bold text-gray-500 mb-3 block">미리보기</span>
+            <div 
+              id="previewCard" 
+              style="background-color: #FEF9C3;" 
+              class="rounded-lg shadow-lg p-6 relative flex flex-col justify-between min-h-[260px] border border-stone-200/50 transition-colors"
+            >
+              <div class="pin absolute -top-1.5 left-1/2 -translate-x-1/2"></div>
+              <div>
+                <h3 id="previewTitle" class="font-bold text-base text-gray-900 mb-2 leading-snug break-words">
+                  제목을 입력해 주세요
+                </h3>
+                <p id="previewContent" class="text-xs text-gray-700 leading-relaxed break-words whitespace-pre-line">
+                  내용을 입력하면 여기에 실시간으로 표시됩니다.
+                </p>
+              </div>
+              <div id="previewFooter" class="pt-4 mt-6 border-t border-black/5 flex items-center justify-between text-[11px] text-gray-500">
+                <span id="previewAuthor">작성자</span>
+                <span>방금 전</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 하단 액션 버튼 바 (너비 전체 일치 및 가독성 개선) -->
+        <div class="flex items-center justify-between pt-5 border-t border-gray-200 mt-2">
+          <!-- 메모 삭제 버튼 (수정 모드일 때만 표시) -->
+          <div>
             <button 
               type="button" 
               id="openDeleteModalBtn" 
-              class="text-xs font-semibold text-red-500 hover:text-red-700 transition"
+              class="text-xs font-bold text-red-600 hover:text-red-700 hover:underline transition px-1 py-1"
             >
               메모 삭제
             </button>
-            <div class="flex items-center gap-2 ml-auto">
-              <a href="index.html" class="px-4 py-2 border rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-50 transition">취소</a>
-              <button 
-                type="submit" 
-                class="bg-[#B04A36] hover:bg-[#973C2A] text-white text-xs font-bold px-5 py-2 rounded-lg shadow transition"
-              >
-                메모 붙이기
-              </button>
-            </div>
           </div>
-        </form>
 
-        <!-- 우측: 실시간 미리보기 -->
-        <div class="md:col-span-5 flex flex-col">
-          <span class="text-xs font-bold text-gray-500 mb-3 block">미리보기</span>
-          <div 
-            id="previewCard" 
-            style="background-color: #FEF9C3;" 
-            class="rounded-lg shadow-lg p-6 relative flex flex-col justify-between min-h-[260px] border border-stone-200/50 transition-colors"
-          >
-            <div class="pin absolute -top-1.5 left-1/2 -translate-x-1/2"></div>
-            <div>
-              <h3 id="previewTitle" class="font-bold text-base text-gray-900 mb-2 leading-snug break-words">
-                제목을 입력해 주세요
-              </h3>
-              <p id="previewContent" class="text-xs text-gray-700 leading-relaxed break-words whitespace-pre-line">
-                내용을 입력하면 여기에 실시간으로 표시됩니다.
-              </p>
-            </div>
-            <div id="previewFooter" class="pt-4 mt-6 border-t border-black/5 flex items-center justify-between text-[11px] text-gray-500">
-              <span id="previewAuthor">작성자</span>
-              <span>방금 전</span>
-            </div>
+          <!-- 취소 및 저장 버튼 그룹 -->
+          <div class="flex items-center gap-3">
+            <a 
+              href="index.html" 
+              class="px-4 py-2 border border-gray-400 bg-white hover:bg-gray-100 text-xs font-bold text-gray-800 rounded-lg shadow-sm transition active:scale-95"
+            >
+              취소
+            </a>
+            <button 
+              type="submit" 
+              class="bg-[#B04A36] hover:bg-[#973C2A] text-white text-xs font-bold px-6 py-2 rounded-lg shadow-md transition active:scale-95"
+            >
+              <span id="submitBtnText">메모 붙이기</span>
+            </button>
           </div>
         </div>
-      </div>
+
+      </form>
 
     </div>
   </main>
@@ -192,7 +208,7 @@
       <h3 class="font-bold text-base text-gray-900 mb-2">메모를 삭제할까요?</h3>
       <p id="deleteModalDesc" class="text-xs text-gray-600 mb-6 leading-relaxed">삭제한 글은 복구할 수 없습니다.</p>
       <div class="flex gap-2">
-        <button id="closeDeleteModalBtn" type="button" class="flex-1 py-2 border rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-50 transition">취소</button>
+        <button id="closeDeleteModalBtn" type="button" class="flex-1 py-2 border border-gray-300 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-50 transition">취소</button>
         <button id="confirmDeleteBtn" type="button" class="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition">삭제하기</button>
       </div>
     </div>
