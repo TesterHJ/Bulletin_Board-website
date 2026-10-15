@@ -1,13 +1,11 @@
+// 1. 관리자 권한 즉시 확인 (화면 렌더링 깜빡임 방지)
+const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+if (!currentUser || currentUser.role !== 'admin') {
+  alert('관리자만 접근할 수 있는 페이지입니다.');
+  window.location.href = 'index.html';
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
-  const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
-
-  // 관리자 권한 확인
-  if (!currentUser || currentUser.role !== 'admin') {
-    alert('관리자만 접근할 수 있는 페이지입니다.');
-    window.location.href = 'index.html';
-    return;
-  }
-
   const adminMemoList = document.getElementById('adminMemoList');
 
   async function loadAdminMemos() {
@@ -78,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).join('');
   }
 
-  // 관리자 권한 강제 삭제
+  // 관리자 권한 강제 삭제 (백엔드 파라미터 매칭)
   window.deleteMemoByAdmin = async (memoId, title) => {
     if (!confirm(`'${title}' 메모를 정말 삭제하시겠습니까?`)) return;
 
@@ -88,7 +86,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           isAdmin: true,
-          requester: currentUser.nickname
+          requesterUsername: currentUser ? currentUser.username : '',
+          requesterNickname: currentUser ? currentUser.nickname : ''
         })
       });
 

@@ -1,13 +1,11 @@
+// 1. 관리자 권한 즉시 확인 (화면 깜빡임 방지 및 즉시 차단)
+const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
+if (!currentUser || currentUser.role !== 'admin') {
+  alert('관리자만 접근할 수 있는 페이지입니다.');
+  window.location.href = 'index.html';
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
-  const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
-
-  // 관리자 권한 확인
-  if (!currentUser || currentUser.role !== 'admin') {
-    alert('관리자만 접근할 수 있는 페이지입니다.');
-    window.location.href = 'index.html';
-    return;
-  }
-
   const reportListContainer = document.getElementById('reportListContainer');
   const reportSummaryText = document.getElementById('reportSummaryText');
 
@@ -52,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <span class="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-0.5 rounded-full">
                 🚨 신고 ${reportCount}회
               </span>
-              <span class="text-xs text-gray-400">작성자: <b class="text-gray-700">${escapeHtml(memo.author)}</b> ${memo.ownerUsername ? `(@${memo.ownerUsername})` : ''}</span>
+              <span class="text-xs text-gray-400">작성자: <b class="text-gray-700">${escapeHtml(memo.author)}</b> ${memo.ownerUsername ? `(@${escapeHtml(memo.ownerUsername)})` : ''}</span>
               <span class="text-xs text-gray-400">· 메모 ID: #${memo._id.slice(-4)}</span>
             </div>
 
@@ -108,7 +106,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await fetch('/api/memo-report', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ memoId, isAdmin: true })
+        body: JSON.stringify({ 
+          memoId, 
+          isAdmin: true,
+          requesterUsername: currentUser ? currentUser.username : ''
+        })
       });
 
       if (!res.ok) throw new Error('반려 처리에 실패했습니다.');
@@ -119,7 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  // 관리자 권한 강제 삭제
+  // 관리자 권한 강제 삭제 (백엔드 파라미터 규격 일치)
   window.deleteReportedMemo = async (memoId, title) => {
     if (!confirm(`'${title}' 메모를 영구 삭제하시겠습니까?`)) return;
 
@@ -127,7 +129,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await fetch(`/api/memo-detail?id=${memoId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isAdmin: true })
+        body: JSON.stringify({ 
+          isAdmin: true,
+          requesterUsername: currentUser ? currentUser.username : '',
+          requesterNickname: currentUser ? currentUser.nickname : ''
+        })
       });
 
       if (!res.ok) throw new Error('메모 삭제에 실패했습니다.');
