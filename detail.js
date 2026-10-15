@@ -43,10 +43,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
 
-      // 본인 글 판별: 닉네임 일치 OR ownerUsername 일치 OR 관리자
+      // 본인 글 판별: ownerUsername 일치 OR author(닉네임/아이디) 일치
       const isAuthor = currentUser && (
-        currentUser.nickname === memo.author ||
-        (memo.ownerUsername && currentUser.username === memo.ownerUsername)
+        (memo.ownerUsername && currentUser.username === memo.ownerUsername) ||
+        (memo.author && currentUser.nickname === memo.author) ||
+        (memo.author && currentUser.username === memo.author)
       );
       const isAdmin = currentUser && currentUser.role === 'admin';
 
@@ -126,10 +127,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // 본인 작성 여부 검증
+      // 본인 작성 여부 검증 (익명이어도 ownerUsername 대조 포함)
       if (currentLoadedMemo) {
         const isOwner = (currentLoadedMemo.ownerUsername && currentLoadedMemo.ownerUsername === currentUser.username) ||
-                        (currentLoadedMemo.author !== '익명' && currentLoadedMemo.author === currentUser.nickname);
+                        (currentLoadedMemo.author !== '익명' && currentLoadedMemo.author === currentUser.nickname) ||
+                        (currentLoadedMemo.author !== '익명' && currentLoadedMemo.author === currentUser.username);
         if (isOwner) {
           alert('본인이 작성한 메모는 신고할 수 없습니다.');
           return;

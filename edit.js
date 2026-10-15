@@ -1,8 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  // 로그인 검증: 비로그인 사용자는 즉시 접근 차단
   const currentUser = JSON.parse(localStorage.getItem('tree_memo_user') || 'null');
   if (!currentUser) {
-    alert('로그인한 회원만 메모를 작성할 수 있습니다.');
+    alert('로그인한 회원만 이용할 수 있습니다.');
     window.location.href = 'index.html';
     return;
   }
@@ -46,9 +45,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!res.ok) throw new Error('메모를 불러올 수 없습니다.');
       const memo = await res.json();
 
-      // 수정 권한 검증: 본인 작성글이 아니면서 관리자도 아닌 경우 차단
+      // 수정 권한 검증 (소유자 username, 작성자 nickname, 관리자 모두 허용)
       const isOwner = (memo.ownerUsername && memo.ownerUsername === currentUser.username) ||
-                      (memo.author === currentUser.nickname);
+                      (memo.author && memo.author === currentUser.nickname) ||
+                      (memo.author && memo.author === currentUser.username);
       const isAdmin = currentUser.role === 'admin';
 
       if (!isOwner && !isAdmin) {
@@ -96,7 +96,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isAnonymous = anonymousCheckbox.checked;
     previewAuthor.textContent = isAnonymous ? '익명' : (currentUser ? currentUser.nickname : '익명');
 
-    // 미리보기 색상 반영
     previewCard.style.backgroundColor = selectedColor;
     const isDark = selectedColor === '#2D3436';
     if (isDark) {
@@ -129,7 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // 작성자 표기명과 실제 소유자 식별값
     const author = isAnonymous ? '익명' : currentUser.nickname;
     const ownerUsername = currentUser.username;
 
@@ -142,7 +140,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         content,
         color,
         author,
-        ownerUsername
+        ownerUsername,
+        requesterUsername: currentUser.username,
+        requesterNickname: currentUser.nickname,
+        isAdmin: currentUser.role === 'admin'
       };
 
       const res = await fetch(endpoint, {
@@ -182,6 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             requesterUsername: currentUser.username,
+            requesterNickname: currentUser.nickname,
             isAdmin: currentUser.role === 'admin'
           })
         });
