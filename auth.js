@@ -33,7 +33,7 @@ function renderHeaderNav() {
 
     let navHtml = `
       <a href="index.html" class="${isIndex ? activeClass : inactiveClass}">게시판</a>
-      <a href="edit.html" class="${isEdit ? activeClass : inactiveClass}">새 메모</a>
+      <a href="edit.html" id="navNewMemoLink" class="${isEdit ? activeClass : inactiveClass}">새 메모</a>
     `;
 
     if (user && user.role === 'admin') {
@@ -44,6 +44,16 @@ function renderHeaderNav() {
     }
 
     navContainer.innerHTML = navHtml;
+
+    // 비로그인 상태에서 헤더의 '새 메모' 클릭 시 로그인 모달 호출
+    const navNewMemoLink = document.getElementById('navNewMemoLink');
+    if (navNewMemoLink && !user) {
+      navNewMemoLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('로그인한 회원만 메모를 작성할 수 있습니다.');
+        openAuthModal('login');
+      });
+    }
   }
 
   // 우측 프로필/인증 영역 렌더링
@@ -87,7 +97,6 @@ function renderHeaderNav() {
   }
 }
 
-// 로그아웃
 function handleLogout() {
   if (confirm('로그아웃 하시겠습니까?')) {
     setStoredUser(null);
@@ -96,7 +105,6 @@ function handleLogout() {
   }
 }
 
-// 로그인/회원가입 모달 열기
 function openAuthModal(mode = 'login') {
   let modalEl = document.getElementById('authModal');
   if (!modalEl) {
