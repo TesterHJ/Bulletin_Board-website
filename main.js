@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // 오늘 00:00:00 자정 타임스탬프
   function getStartOfToday() {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -94,8 +95,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const totalMemos = filteredAndSortedMemos.length;
     const totalPages = Math.max(1, Math.ceil(totalMemos / MEMOS_PER_PAGE));
 
+    // 오늘 등록된 메모 개수만 계산하여 안내 문구 출력
     if (memoCountText) {
-      memoCountText.textContent = `오늘 ${allMemos.length}개의 이야기가 새로 붙었어요`;
+      const startOfToday = getStartOfToday();
+      const todayCount = allMemos.filter(memo => {
+        const created = memo.createdAt ? new Date(memo.createdAt).getTime() : 0;
+        return created >= startOfToday;
+      }).length;
+
+      if (todayCount === 0) {
+        memoCountText.textContent = '오늘 아직 새로운 이야기가 없어요. 첫 메모를 남겨보세요!';
+      } else {
+        memoCountText.textContent = `오늘 ${todayCount}개의 이야기가 새로 붙었어요`;
+      }
     }
 
     if (totalMemos === 0) {
